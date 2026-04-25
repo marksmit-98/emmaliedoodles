@@ -263,14 +263,34 @@
     const CALENDAR_NAME = 'Emmaliedoodles';
 
     const SCHEMA = [
-      { day: 21,  week: 'Week 3',   title: 'Ontwormen' },
-      { day: 28,  week: 'Week 4',   title: 'Kennismakingsgesprekken kopers' },
-      { day: 35,  week: 'Week 5',   title: 'Ontwormen' },
-      { day: 42,  week: 'Week 6',   title: 'Vaccinatie + chip' },
-      { day: 42,  week: 'Week 6',   title: 'Puppy kijkmoment + voorkeur doorgeven' },
-      { day: 49,  week: 'Week 7',   title: 'Ontwormen' },
-      { day: 53,  week: 'Week 7.5', title: 'Pups vertrekklaar' },
-      { day: 56,  week: 'Week 8',   title: 'Pups vertrekken' },
+      {
+        day: 21, week: 'Week 3', title: 'Ontwormen',
+        notes: '',
+      },
+      {
+        day: 28, week: 'Week 4', title: 'Kennismakingsgesprekken kopers',
+        notes: '• Spullen vachtverzorging klaarleggen voor kopers\n• Invulformulieren vachtverzorging producten printen\n• Kopers informeren over vachtverzorging en voeding',
+      },
+      {
+        day: 35, week: 'Week 5', title: 'Ontwormen',
+        notes: '',
+      },
+      {
+        day: 42, week: 'Week 6', title: 'Vaccinatie + chip',
+        notes: '• Afspraak dierenarts: vaccinatie + chip inbrengen\n• Puppypaspoort ophalen en controleren\n• Chipnummers registreren per pup\n• Inschrijven ALAEU\n• Koopcontracten opstellen',
+      },
+      {
+        day: 42, week: 'Week 6', title: 'Puppy kijkmoment + voorkeur doorgeven',
+        notes: '• Kopers uitnodigen voor kijkmoment\n• Kopers geven hun voorkeur door\n• Foto\'s maken per pup',
+      },
+      {
+        day: 49, week: 'Week 7', title: 'Ontwormen',
+        notes: '',
+      },
+      {
+        day: 53, week: 'Week 7.5', title: 'Pups mogen vertrekken',
+        notes: '• Vanaf deze datum mogen pups naar hun nieuwe thuis\n• Meegeven: puppypas en chipregistratieformulier\n• Meegeven: vachtproductenlijst, voedingsadvies en startpakket\n• Meegeven: nestknuffel\n• Meegeven: informatiepapier chippen en inenten\n• Kopers informeren dat ze hun pup kunnen ophalen',
+      },
     ];
 
     let tokenClient = null;
@@ -369,7 +389,9 @@
 
         const body = {
           summary: `${item.title} \u2013 ${nestnaam}`,
-          description: `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
+          description: item.notes
+            ? `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}\n\n${item.notes}`
+            : `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
           start: { date: dateStr },
           end:   { date: nextDay },
         };
