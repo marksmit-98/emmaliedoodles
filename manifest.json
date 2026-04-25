@@ -1,0 +1,21 @@
+{
+  "name": "Nestplanning - Emmaliedoodles",
+  "short_name": "Nestplanning",
+  "description": "Nestplanning voor Emmaliedoodles",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f1ec",
+  "theme_color": "#8b9a78",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

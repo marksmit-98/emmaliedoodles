@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=Public+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8b9a78">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -452,6 +454,11 @@
           </div>
         `;
       }
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
     }
   </script>
 </body>
