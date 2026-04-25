@@ -373,7 +373,8 @@
       }
 
       if (!calendarId) {
-        showStatus(`Agenda "${CALENDAR_NAME}" niet gevonden. Zorg dat deze agenda bestaat in Google Agenda.`, 'error');
+        const names = (await (await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', { headers: { Authorization: `Bearer ${accessToken}` } })).json()).items.map(c => c.summary).join(', ');
+        showStatus(`Agenda "${CALENDAR_NAME}" niet gevonden. Gevonden agenda's: ${names}`, 'error');
         document.getElementById('planBtn').disabled = false;
         return;
       }
