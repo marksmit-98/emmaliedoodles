@@ -335,7 +335,7 @@
     }
 
     async function findCalendarId() {
-      const res = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+      const res = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true', {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       if (!res.ok) throw new Error('Kan agendalist niet ophalen.');
@@ -373,7 +373,7 @@
       }
 
       if (!calendarId) {
-        const names = (await (await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', { headers: { Authorization: `Bearer ${accessToken}` } })).json()).items.map(c => c.summary).join(', ');
+        const names = (await (await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true', { headers: { Authorization: `Bearer ${accessToken}` } })).json()).items.map(c => c.summary).join(', ');
         showStatus(`Agenda "${CALENDAR_NAME}" niet gevonden. Gevonden agenda's: ${names}`, 'error');
         document.getElementById('planBtn').disabled = false;
         return;
