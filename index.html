@@ -487,11 +487,12 @@
       }
     }
 
-    async function findExistingEvents(calendarId, nestnaam) {
+    async function findExistingEvents(calendarId, nestnaam, geboortedatum) {
       let events = [];
       let pageToken = null;
+      const timeMin = encodeURIComponent(geboortedatum + 'T00:00:00Z');
       do {
-        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?q=${encodeURIComponent('– ' + nestnaam)}&maxResults=250${pageToken ? '&pageToken=' + pageToken : ''}`;
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?q=${encodeURIComponent('– ' + nestnaam)}&timeMin=${timeMin}&maxResults=250${pageToken ? '&pageToken=' + pageToken : ''}`;
         const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
         if (!res.ok) throw new Error('Kan bestaande afspraken niet ophalen.');
         const data = await res.json();
@@ -540,7 +541,7 @@
       showStatus(`Bestaande afspraken zoeken voor ${nestnaam}...`, 'info');
       let existing;
       try {
-        existing = await findExistingEvents(calendarId, nestnaam);
+        existing = await findExistingEvents(calendarId, nestnaam, geboortedatum);
       } catch (e) {
         showStatus(e.message, 'error');
         document.getElementById('planBtn').disabled = false;
