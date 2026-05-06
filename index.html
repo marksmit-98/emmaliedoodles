@@ -292,7 +292,7 @@
       },
       {
         day: 21, week: 'Week 3', title: 'Ontwormen',
-        notes: '', reminderMinutes: -1200,
+        notes: '', timedReminder: true,
       },
       {
         day: 28, week: 'Week 4', title: 'Kennismakingsgesprekken kopers',
@@ -300,7 +300,7 @@
       },
       {
         day: 35, week: 'Week 5', title: 'Ontwormen',
-        notes: '', reminderMinutes: -1200,
+        notes: '', timedReminder: true,
       },
       {
         day: 42, week: 'Week 6', title: 'Vaccinatie + chip',
@@ -312,7 +312,7 @@
       },
       {
         day: 49, week: 'Week 7', title: 'Ontwormen',
-        notes: '', reminderMinutes: -1200,
+        notes: '', timedReminder: true,
       },
       {
         day: 53, week: 'Week 7.5', title: 'Pups mogen vertrekken',
@@ -417,9 +417,6 @@
             : `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
           start: { date: dateStr },
           end:   { date: nextDay },
-          ...(item.reminderMinutes !== undefined && {
-            reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: item.reminderMinutes }] }
-          }),
         };
 
         const res = await fetch(
@@ -443,6 +440,30 @@
         }
 
         created.push({ ...item, date: dateStr });
+
+        if (item.timedReminder) {
+          const reminderBody = {
+            summary: `${item.title} \u2013 ${nestnaam}`,
+            start: { dateTime: `${dateStr}T21:00:00`, timeZone: 'Europe/Amsterdam' },
+            end:   { dateTime: `${dateStr}T21:30:00`, timeZone: 'Europe/Amsterdam' },
+            reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+          };
+          const reminderRes = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+            {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify(reminderBody),
+            }
+          );
+          if (!reminderRes.ok) {
+            const err = await reminderRes.json();
+            showStatus(`Fout bij aanmaken reminder "${item.title}": ${err.error?.message || reminderRes.status}`, 'error');
+            document.getElementById('planBtn').disabled = false;
+            document.getElementById('updateBtn').disabled = false;
+            return;
+          }
+        }
       }
 
       showStatus(`Klaar! ${created.length} afspraken aangemaakt in de ${CALENDAR_NAME} agenda.`, 'success');
@@ -579,9 +600,6 @@
             : `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
           start: { date: dateStr },
           end:   { date: nextDay },
-          ...(item.reminderMinutes !== undefined && {
-            reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: item.reminderMinutes }] }
-          }),
         };
 
         const res = await fetch(
@@ -602,6 +620,30 @@
         }
 
         created.push({ ...item, date: dateStr });
+
+        if (item.timedReminder) {
+          const reminderBody = {
+            summary: `${item.title} – ${nestnaam}`,
+            start: { dateTime: `${dateStr}T21:00:00`, timeZone: 'Europe/Amsterdam' },
+            end:   { dateTime: `${dateStr}T21:30:00`, timeZone: 'Europe/Amsterdam' },
+            reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+          };
+          const reminderRes = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+            {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify(reminderBody),
+            }
+          );
+          if (!reminderRes.ok) {
+            const err = await reminderRes.json();
+            showStatus(`Fout bij aanmaken reminder "${item.title}": ${err.error?.message || reminderRes.status}`, 'error');
+            document.getElementById('planBtn').disabled = false;
+            document.getElementById('updateBtn').disabled = false;
+            return;
+          }
+        }
       }
 
       showStatus(`Klaar! ${existing.length} oude afspraken verwijderd en ${created.length} bijgewerkte afspraken aangemaakt.`, 'success');
