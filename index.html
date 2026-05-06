@@ -137,6 +137,23 @@
       box-shadow: none;
     }
 
+    .btn-secondary {
+      background: white;
+      color: #43554f;
+      border: 1.5px solid #43554f;
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: #f4f1ec;
+    }
+
+    .btn-secondary:disabled {
+      background: white;
+      color: #a3b0ab;
+      border-color: #a3b0ab;
+    }
+
     .status {
       margin-top: 24px;
       padding: 14px 18px;
@@ -254,6 +271,9 @@
     <button class="btn" id="planBtn" onclick="startFlow()">
       Inloggen met Google en planning aanmaken
     </button>
+    <button class="btn btn-secondary" id="updateBtn" onclick="startUpdateFlow()">
+      Bestaande afspraken bijwerken
+    </button>
 
     <div class="status" id="status"></div>
     <div class="event-list" id="eventList"></div>
@@ -325,20 +345,11 @@
       }
 
       document.getElementById('planBtn').disabled = true;
+      document.getElementById('updateBtn').disabled = true;
       document.getElementById('eventList').style.display = 'none';
 
       initTokenClient();
       tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
-
-    async function handleToken(response) {
-      if (response.error) {
-        showStatus('Inloggen mislukt: ' + response.error, 'error');
-        document.getElementById('planBtn').disabled = false;
-        return;
-      }
-      accessToken = response.access_token;
-      await createAllEvents();
     }
 
     async function findCalendarId() {
@@ -356,7 +367,10 @@
     function addDays(dateStr, days) {
       const d = new Date(dateStr + 'T00:00:00');
       d.setDate(d.getDate() + days);
-      return d.toISOString().split('T')[0];
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
     function formatDate(dateStr) {
@@ -383,6 +397,7 @@
         const names = (await (await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true', { headers: { Authorization: `Bearer ${accessToken}` } })).json()).items.map(c => c.summary).join(', ');
         showStatus(`Agenda "${CALENDAR_NAME}" niet gevonden. Gevonden agenda's: ${names}`, 'error');
         document.getElementById('planBtn').disabled = false;
+        document.getElementById('updateBtn').disabled = false;
         return;
       }
 
@@ -420,6 +435,7 @@
           const err = await res.json();
           showStatus(`Fout bij aanmaken "${item.title}": ${err.error?.message || res.status}`, 'error');
           document.getElementById('planBtn').disabled = false;
+          document.getElementById('updateBtn').disabled = false;
           return;
         }
 
@@ -429,6 +445,162 @@
       showStatus(`Klaar! ${created.length} afspraken aangemaakt in de ${CALENDAR_NAME} agenda.`, 'success');
       showEventList(created);
       document.getElementById('planBtn').disabled = false;
+      document.getElementById('updateBtn').disabled = false;
+    }
+
+    let updateMode = false;
+
+    function startUpdateFlow() {
+      const nestnaam = document.getElementById('nestnaam').value.trim();
+      const geboortedatum = document.getElementById('geboortedatum').value;
+
+      if (!nestnaam) { showStatus('Vul een nestnaam in.', 'error'); return; }
+      if (!geboortedatum) { showStatus('Vul een geboortedatum in.', 'error'); return; }
+
+      if (typeof google === 'undefined') {
+        showStatus('Google script nog niet geladen. Wacht even en probeer opnieuw.', 'error');
+        return;
+      }
+
+      document.getElementById('updateBtn').disabled = true;
+      document.getElementById('planBtn').disabled = true;
+      document.getElementById('eventList').style.display = 'none';
+
+      updateMode = true;
+      initTokenClient();
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    async function handleToken(response) {
+      if (response.error) {
+        showStatus('Inloggen mislukt: ' + response.error, 'error');
+        document.getElementById('planBtn').disabled = false;
+        document.getElementById('updateBtn').disabled = false;
+        return;
+      }
+      accessToken = response.access_token;
+      if (updateMode) {
+        updateMode = false;
+        await updateAllEvents();
+      } else {
+        await createAllEvents();
+      }
+    }
+
+    async function findExistingEvents(calendarId, nestnaam) {
+      let events = [];
+      let pageToken = null;
+      do {
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?q=${encodeURIComponent('– ' + nestnaam)}&maxResults=250${pageToken ? '&pageToken=' + pageToken : ''}`;
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+        if (!res.ok) throw new Error('Kan bestaande afspraken niet ophalen.');
+        const data = await res.json();
+        const matching = (data.items || []).filter(e =>
+          e.summary && e.summary.includes(`– ${nestnaam}`) && e.status !== 'cancelled'
+        );
+        events = events.concat(matching);
+        pageToken = data.nextPageToken || null;
+      } while (pageToken);
+      return events;
+    }
+
+    async function deleteEvent(calendarId, eventId) {
+      const res = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+        { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!res.ok && res.status !== 404 && res.status !== 410) {
+        throw new Error(`Fout bij verwijderen: ${res.status}`);
+      }
+    }
+
+    async function updateAllEvents() {
+      const nestnaam = document.getElementById('nestnaam').value.trim();
+      const geboortedatum = document.getElementById('geboortedatum').value;
+
+      showStatus('Emmaliedoodles agenda zoeken...', 'info');
+
+      let calendarId;
+      try {
+        calendarId = await findCalendarId();
+      } catch (e) {
+        showStatus(e.message, 'error');
+        document.getElementById('planBtn').disabled = false;
+        document.getElementById('updateBtn').disabled = false;
+        return;
+      }
+
+      if (!calendarId) {
+        showStatus(`Agenda "${CALENDAR_NAME}" niet gevonden.`, 'error');
+        document.getElementById('planBtn').disabled = false;
+        document.getElementById('updateBtn').disabled = false;
+        return;
+      }
+
+      showStatus(`Bestaande afspraken zoeken voor ${nestnaam}...`, 'info');
+      let existing;
+      try {
+        existing = await findExistingEvents(calendarId, nestnaam);
+      } catch (e) {
+        showStatus(e.message, 'error');
+        document.getElementById('planBtn').disabled = false;
+        document.getElementById('updateBtn').disabled = false;
+        return;
+      }
+
+      for (let i = 0; i < existing.length; i++) {
+        showStatus(`Verwijderen ${i + 1} van ${existing.length}...`, 'info');
+        try {
+          await deleteEvent(calendarId, existing[i].id);
+        } catch (e) {
+          showStatus(e.message, 'error');
+          document.getElementById('planBtn').disabled = false;
+          document.getElementById('updateBtn').disabled = false;
+          return;
+        }
+      }
+
+      const created = [];
+      for (let i = 0; i < SCHEMA.length; i++) {
+        const item = SCHEMA[i];
+        showStatus(`Aanmaken ${i + 1} van ${SCHEMA.length}...`, 'info');
+
+        const dateStr = addDays(geboortedatum, item.day);
+        const nextDay = addDays(geboortedatum, item.day + 1);
+
+        const body = {
+          summary: `${item.title} – ${nestnaam}`,
+          description: item.notes
+            ? `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}\n\n${item.notes}`
+            : `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
+          start: { date: dateStr },
+          end:   { date: nextDay },
+        };
+
+        const res = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          }
+        );
+
+        if (!res.ok) {
+          const err = await res.json();
+          showStatus(`Fout bij aanmaken "${item.title}": ${err.error?.message || res.status}`, 'error');
+          document.getElementById('planBtn').disabled = false;
+          document.getElementById('updateBtn').disabled = false;
+          return;
+        }
+
+        created.push({ ...item, date: dateStr });
+      }
+
+      showStatus(`Klaar! ${existing.length} oude afspraken verwijderd en ${created.length} bijgewerkte afspraken aangemaakt.`, 'success');
+      showEventList(created);
+      document.getElementById('planBtn').disabled = false;
+      document.getElementById('updateBtn').disabled = false;
     }
 
     function showStatus(msg, type) {
