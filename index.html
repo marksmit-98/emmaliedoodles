@@ -149,6 +149,12 @@
       letter-spacing: -0.02em;
     }
 
+    .section-sub {
+      font-size: 13px;
+      color: #a09890;
+      margin: -8px 0 16px;
+    }
+
     .group-label {
       font-size: 11px;
       font-weight: 500;
@@ -465,10 +471,14 @@
       min-width: 110px;
     }
 
-    .cal-cell-now  { background: #f4f1ec; }
-    .cal-cell-red  { background: #fde8e6; cursor: pointer; }
+    .cal-cell-now       { background: #f4f1ec; }
+    .cal-cell-red       { background: #fde8e6; cursor: pointer; }
     .cal-cell-red:hover { background: #f9c9c4; }
-    .cal-cell-yellow { background: #fef9e7; }
+    .cal-cell-yellow    { background: #fef9e7; }
+    .cal-cell-projected { background: #edf0ef; }
+
+    .cal-table th { min-width: 52px; }
+    .cal-scroll { margin: 16px -16px 0; padding-bottom: 8px; }
 
     .dot {
       display: inline-block;
@@ -685,15 +695,30 @@ function expectedWindow(cycles) {
   return { from, center: addDays(from, 14), to: addDays(from, 42) };
 }
 
+function allExpectedWindows(cycles) {
+  if (!cycles.length) return [];
+  const horizon   = addMonths(new Date(), 26);
+  const avg       = avgInterval(cycles);
+  const lastMated = cycles[cycles.length - 1].mated;
+  const results   = [];
+  let w = expectedWindow(cycles);
+  let isFirst = true;
+  let i = 0;
+  while (w && w.from <= horizon && i++ < 12) {
+    results.push({ ...w, color: isFirst ? (lastMated ? 'yellow' : 'red') : 'projected' });
+    const nextCenter = avg !== null ? addDays(w.center, Math.round(avg)) : addMonths(w.center, 6);
+    w = { from: addDays(nextCenter, -14), center: nextCenter, to: addDays(nextCenter, 28) };
+    isFirst = false;
+  }
+  return results;
+}
+
 function cellColor(dogId, year, month) {
-  const cycles = dogCycles(dogId);
-  if (!cycles.length) return null;
-  const w = expectedWindow(cycles);
-  if (!w) return null;
-  const start = new Date(year, month, 1);
-  const end   = new Date(year, month + 1, 0);
-  if (w.from > end || w.to < start) return null;
-  return cycles[cycles.length - 1].mated ? 'yellow' : 'red';
+  const monthStart = new Date(year, month, 1);
+  const monthEnd   = new Date(year, month + 1, 0);
+  const windows    = allExpectedWindows(dogCycles(dogId));
+  const hit = windows.find(w => w.from <= monthEnd && w.to >= monthStart);
+  return hit ? hit.color : null;
 }
 
 // ── firestore helpers ─────────────────────────────────
@@ -816,6 +841,7 @@ function renderTeefjes() {
       <span class="section-title">Teefjes</span>
       <button class="btn btn-sm" onclick="openDogModal(null)">+ Toevoegen</button>
     </div>
+    <p class="section-sub">Alle honden in het fokprogramma</p>
   `;
 
   if (!dogs.length) {
@@ -912,19 +938,21 @@ window.confirmDeleteDog = id => {
 // ── LOOPSHEDEN ────────────────────────────────────────
 function renderLoopsheden() {
   const el = document.getElementById('tab-loopsheden');
-  const activeDogs = dogs.filter(d => d.status !== 'Gepensioneerd');
-  if (!selectedDogId && activeDogs.length) selectedDogId = activeDogs[0].id;
+  const activeDogs = dogs.filter(d => d.status === 'Actief');
+  if (!selectedDogId || !activeDogs.find(d => d.id === selectedDogId)) {
+    selectedDogId = activeDogs[0]?.id ?? null;
+  }
 
   let html = `
     <div class="section-header">
       <span class="section-title">Loopsheden</span>
       ${selectedDogId ? `<button class="btn btn-sm" onclick="openCycleModal(null)">+ Toevoegen</button>` : ''}
     </div>
-    <div class="dog-selector">
-      ${activeDogs.map(d => `
-        <div class="dog-chip ${d.id === selectedDogId ? 'active' : ''}"
-             onclick="selectDog('${d.id}')">${esc(d.name)}</div>
-      `).join('')}
+    <p class="section-sub">Historie en invoer van loopsheden per hond</p>
+    <div class="form-group" style="margin-bottom:20px">
+      <select id="dogSelect" onchange="selectDog(this.value)">
+        ${activeDogs.map(d => `<option value="${d.id}" ${d.id === selectedDogId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
+      </select>
     </div>
   `;
 
@@ -1025,6 +1053,7 @@ function renderFokplanning() {
     <div class="section-header">
       <span class="section-title">Fokplanning</span>
     </div>
+    <p class="section-sub">Verwachte loopsheden en intervalberekening per hond</p>
   `;
 
   if (!active.length) {
@@ -1082,9 +1111,11 @@ function renderKalender() {
     <div class="section-header">
       <span class="section-title">Kalender</span>
     </div>
+    <p class="section-sub">Maandoverzicht van verwachte loopsheden</p>
     <div class="legend">
-      <div class="legend-item"><span class="dot dot-red"></span> Verwachte loopsheid — dekking niet mogelijk</div>
-      <div class="legend-item"><span class="dot dot-yellow"></span> Verwachte loopsheid — dekking mogelijk</div>
+      <div class="legend-item"><span class="dot dot-red"></span> Dekking niet mogelijk</div>
+      <div class="legend-item"><span class="dot dot-yellow"></span> Dekking mogelijk</div>
+      <div class="legend-item"><span class="dot" style="background:#c8d5c8"></span> Verwacht (prognose)</div>
     </div>
     <div class="cal-scroll">
       <table class="cal-table">
@@ -1114,20 +1145,16 @@ function renderKalender() {
       const color = cellColor(d.id, y, m);
 
       let cls = '';
-      if (color === 'red')    cls = 'cal-cell-red';
-      else if (color === 'yellow') cls = 'cal-cell-yellow';
-      else if (isNow)         cls = 'cal-cell-now';
+      if (color === 'red')        cls = 'cal-cell-red';
+      else if (color === 'yellow')    cls = 'cal-cell-yellow';
+      else if (color === 'projected') cls = 'cal-cell-projected';
+      else if (isNow)             cls = 'cal-cell-now';
 
       const clickable = color === 'red'
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
         : '';
 
-      html += `
-        <td class="${cls}" ${clickable}>
-          ${color === 'red'    ? '<span class="dot dot-red"></span>' : ''}
-          ${color === 'yellow' ? '<span class="dot dot-yellow"></span>' : ''}
-        </td>
-      `;
+      html += `<td class="${cls}" ${clickable}></td>`;
     }
     html += `</tr>`;
   }

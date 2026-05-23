@@ -25,31 +25,35 @@
       padding: 0 0 40px;
     }
 
-    .top-bar {
+    .app-header {
       width: 100%;
       background: white;
       border-bottom: 1px solid #e8e4de;
       padding: 14px 20px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-header-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 20px;
+      color: #43554f;
+      letter-spacing: -0.02em;
     }
 
     .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
       font-family: 'Public Sans', sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 400;
-      color: #43554f;
+      color: #5f6e5e;
       text-decoration: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px 0;
     }
-
-    .back-btn:hover { color: #5f6e5e; }
+    .back-btn:hover { color: #43554f; }
 
     .card {
       background: white;
@@ -285,9 +289,10 @@
   </style>
 </head>
 <body>
-  <div class="top-bar">
+  <header class="app-header">
+    <span class="app-header-title">Emmaliedoodles</span>
     <a href="index.html" class="back-btn">&#8592; Fokprogramma</a>
-  </div>
+  </header>
 
   <div class="card">
     <div class="header">
