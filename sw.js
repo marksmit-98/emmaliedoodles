@@ -1,5 +1,5 @@
-const CACHE = 'emmaliedoodles-v2';
-const ASSETS = ['/', '/index.html', '/fokkerij.html', '/favicon.png', '/manifest.json'];
+const CACHE = 'emmaliedoodles-v3';
+const ASSETS = ['/', '/index.html', '/nestplanning.html', '/favicon.png', '/manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
