@@ -1324,6 +1324,9 @@ function renderKalender() {
 
 // ── DEK → drachtplanner ───────────────────────────────
 window.openDekModal = dogId => {
+  sessionStorage.setItem('activeDogs', JSON.stringify(
+    dogs.filter(d => d.status === 'Actief').map(d => ({ id: d.id, name: d.name }))
+  ));
   window.location.href = `drachtplanner.html?dogId=${encodeURIComponent(dogId)}`;
 };
 

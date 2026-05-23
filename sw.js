@@ -1,4 +1,4 @@
-const CACHE = 'emmaliedoodles-v4';
+const CACHE = 'emmaliedoodles-v5';
 const ASSETS = ['/', '/index.html', '/nestplanning.html', '/drachtplanner.html', '/favicon.png', '/manifest.json'];
 
 self.addEventListener('install', e => {

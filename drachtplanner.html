@@ -332,26 +332,36 @@ function calcDates(loopsheid) {
 document.getElementById('loadingCard').style.display = 'none';
 document.getElementById('mainContent').style.display = 'block';
 
-// Load data whenever Firebase session resolves (may fire slightly after page shows)
+// Pre-fill dogs from sessionStorage (set by index.html on navigation)
+try {
+  const cached = sessionStorage.getItem('activeDogs');
+  if (cached) activeDogs = JSON.parse(cached);
+  if (activeDogs.length) populateDogDropdowns();
+} catch(e) {}
+
+// Load full data (dogs + planning) whenever Firebase session resolves
 onAuthStateChanged(auth, async user => {
-  if (user && ALLOWED.includes(user.email) && !activeDogs.length) {
+  if (user && ALLOWED.includes(user.email)) {
     await loadData();
   }
 });
 
 async function loadData() {
-  const [dogsSnap, planSnap] = await Promise.all([
-    getDocs(collection(db, 'dogs')),
-    getDocs(query(collection(db, 'drachtPlanning'), orderBy('createdAt', 'desc'))),
-  ]);
-  activeDogs = dogsSnap.docs
-    .map(d => ({ id: d.id, ...d.data() }))
-    .filter(d => d.status === 'Actief')
-    .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-  planning = planSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-  populateDogDropdowns();
-  renderPlanning();
+  try {
+    const [dogsSnap, planSnap] = await Promise.all([
+      getDocs(collection(db, 'dogs')),
+      getDocs(query(collection(db, 'drachtPlanning'), orderBy('createdAt', 'desc'))),
+    ]);
+    activeDogs = dogsSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(d => d.status === 'Actief')
+      .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+    planning = planSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    populateDogDropdowns();
+    renderPlanning();
+  } catch(e) {
+    console.warn('Firestore laden mislukt:', e.message);
+  }
 }
 
 function populateDogDropdowns() {
