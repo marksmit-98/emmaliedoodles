@@ -29,6 +29,7 @@
       width: 100%;
       background: white;
       border-bottom: 1px solid #e8e4de;
+      box-shadow: 0 1px 12px rgba(67,85,79,0.07);
       padding: 14px 20px;
       display: flex;
       align-items: center;
@@ -56,8 +57,10 @@
     .back-btn:hover { color: #43554f; }
 
     .card {
-      background: white;
-      border-radius: 4px;
+      background: #faf8f5;
+      border-radius: 12px;
+      border: 1px solid #e8e4de;
+      box-shadow: 0 2px 20px rgba(67,85,79,0.08);
       padding: 32px 24px;
       width: 100%;
       max-width: 560px;
@@ -111,7 +114,8 @@
     }
 
     input[type="text"],
-    input[type="date"] {
+    input[type="date"],
+    select {
       width: 100%;
       padding: 13px 16px;
       border: 1px solid #d6d0c8;
@@ -128,10 +132,20 @@
     }
 
     input[type="text"]:focus,
-    input[type="date"]:focus {
+    input[type="date"]:focus,
+    select:focus {
       border-color: #43554f;
       background: white;
     }
+
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: ''; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #43554f;
+      pointer-events: none;
+    }
+    .select-wrap select { padding-right: 36px; }
 
     input[type="text"]::placeholder {
       color: #b0a898;
@@ -241,17 +255,20 @@
       align-items: center;
       gap: 14px;
       padding: 12px 0;
-      border-bottom: 1px solid #f0ece6;
+      border-left: 3px solid #43554f;
+      padding-left: 14px;
+      margin-bottom: 8px;
+      transition: transform 0.15s;
     }
 
-    .event-item:last-child {
-      border-bottom: none;
+    .event-item:hover {
+      transform: translateX(2px);
     }
 
     .event-check {
       width: 22px;
       height: 22px;
-      background: #43554f;
+      background: linear-gradient(135deg, #43554f, #7bb87b);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -290,12 +307,15 @@
     .planning-group { margin-bottom: 24px; }
 
     .planning-nest-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: #a09890;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      font-weight: 300;
+      color: #43554f;
+      letter-spacing: -0.01em;
+      text-transform: none;
       margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e8e4de;
     }
 
     .planning-event {
@@ -308,12 +328,14 @@
     .planning-event:last-child { border-bottom: none; }
 
     .planning-dot {
-      width: 8px;
-      height: 8px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: #43554f;
       flex-shrink: 0;
     }
+
+    .card-title { font-family:'Fraunces',serif; font-weight:300; font-size:22px; color:#43554f; letter-spacing:-0.02em; margin-bottom:4px; padding-bottom:16px; border-bottom:1px solid #e8e4de; }
 
     .planning-info { flex: 1; }
 
@@ -335,11 +357,10 @@
 
     <div class="form-group" id="dogDropdownGroup" style="display:none">
       <label>Hond</label>
-      <div class="select-wrap" style="position:relative">
-        <select id="dogDropdown" onchange="onDogSelect(this.value)" style="width:100%;padding:13px 16px;border:1px solid #d6d0c8;border-radius:2px;font-family:'Public Sans',sans-serif;font-size:16px;font-weight:300;color:#282D33;background:#faf8f5;-webkit-appearance:none;appearance:none;outline:none;padding-right:36px">
+      <div class="select-wrap">
+        <select id="dogDropdown" onchange="onDogSelect(this.value)">
           <option value="">Selecteer een hond...</option>
         </select>
-        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #43554f;pointer-events:none"></span>
       </div>
     </div>
 
@@ -367,7 +388,7 @@
 
   <!-- Huidige nestplanning card -->
   <div class="card" style="margin-top:16px">
-    <div style="font-family:'Fraunces',serif;font-weight:300;font-size:20px;color:#43554f;letter-spacing:-0.02em;margin-bottom:10px">Huidige nestplanning</div>
+    <div class="card-title">Huidige nestplanning</div>
     <p style="font-size:14px;color:#5f6e5e;margin-bottom:20px">Bekijk aankomende nestafspraken in de agenda</p>
     <button class="btn btn-secondary" id="loadPlanningBtn" onclick="loadNestPlanning()">
       Inloggen en planning tonen

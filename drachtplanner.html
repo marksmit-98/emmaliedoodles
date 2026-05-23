@@ -29,6 +29,7 @@
       width: 100%;
       background: white;
       border-bottom: 1px solid #e8e4de;
+      box-shadow: 0 1px 12px rgba(67,85,79,0.07);
       padding: 14px 20px;
       display: flex;
       align-items: center;
@@ -42,8 +43,10 @@
     .back-btn:hover { color:#43554f; }
 
     .card {
-      background: white;
-      border-radius: 4px;
+      background: #faf8f5;
+      border-radius: 12px;
+      border: 1px solid #e8e4de;
+      box-shadow: 0 2px 20px rgba(67,85,79,0.08);
       padding: 32px 24px;
       width: 100%;
       max-width: 560px;
@@ -58,7 +61,7 @@
     .header h1 { font-family:'Fraunces',serif; font-weight:300; font-size:32px; color:#43554f; letter-spacing:-0.03em; line-height:1.2; }
     .header p  { font-size:14px; font-weight:300; color:#5f6e5e; margin-top:6px; }
 
-    .card-title { font-family:'Fraunces',serif; font-weight:300; font-size:20px; color:#43554f; letter-spacing:-0.02em; margin-bottom:20px; }
+    .card-title { font-family:'Fraunces',serif; font-weight:300; font-size:22px; color:#43554f; letter-spacing:-0.02em; margin-bottom:4px; padding-bottom:16px; border-bottom:1px solid #e8e4de; }
 
     .form-group { margin-bottom: 24px; }
     label { display:block; font-size:13px; font-weight:500; color:#43554f; margin-bottom:8px; letter-spacing:0.02em; text-transform:uppercase; }
@@ -89,9 +92,13 @@
     /* preview */
     .preview { background:#f4f1ec; border-radius:4px; padding:20px; margin-bottom:24px; display:none; }
     .preview-title { font-size:11px; font-weight:500; color:#a09890; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px; }
-    .preview-row { display:flex; align-items:flex-start; gap:12px; padding:9px 0; border-bottom:1px solid #e8e4de; }
+    .preview-row { display:flex; align-items:flex-start; gap:12px; padding:9px 0; border-left:3px solid transparent; padding-left:14px; border-bottom:1px solid #f0ece6; }
     .preview-row:last-child { border-bottom:none; }
-    .preview-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .preview-row.row-loopsheid { border-left-color: #e57373; }
+    .preview-row.row-dekking   { border-left-color: #f0b429; }
+    .preview-row.row-echo      { border-left-color: #43554f; }
+    .preview-row.row-worp      { border-left-color: #5b8a8b; }
+    .preview-icon { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
     .icon-loopsheid { background:#fde8e6; }
     .icon-dekking   { background:#fff3cd; }
     .icon-echo      { background:#d4edda; }
@@ -123,19 +130,44 @@
     .status.error   { background:#fdf0ef; color:#8b3a32;  border-left:3px solid #c0392b;  display:block; }
     .status.success { background:#edf2ef; color:#2e5240;  border-left:3px solid #43554f;  display:block; }
 
-    /* planning table */
-    .planning-table { width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; }
-    .planning-table th {
-      text-align:left; padding:8px 10px; font-size:11px; font-weight:500;
-      color:#a09890; text-transform:uppercase; letter-spacing:0.06em;
-      border-bottom:2px solid #e8e4de; white-space:nowrap;
+    /* plan entries */
+    .plan-entry {
+      background: white;
+      border: 1px solid #e8e4de;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
     }
-    .planning-table td { padding:12px 10px; border-bottom:1px solid #f0ece6; vertical-align:middle; }
-    .planning-table tr:last-child td { border-bottom:none; }
-    .planning-table tr:hover td { background:#faf8f5; }
-    .dog-name-cell { font-weight:400; color:#282D33; }
-    .date-cell { color:#5f6e5e; white-space:nowrap; }
-    .actions-cell { white-space:nowrap; display:flex; gap:6px; }
+    .plan-entry-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .plan-entry-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #43554f;
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .plan-entry-dog { flex: 1; font-size: 15px; font-weight: 500; color: #282D33; }
+    .plan-entry-actions { display: flex; gap: 4px; }
+    .plan-entry-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .plan-date-chip {
+      background: #f4f1ec;
+      border-radius: 6px;
+      padding: 5px 10px;
+      display: flex; flex-direction: column;
+    }
+    .chip-label { font-size: 10px; font-weight: 500; color: #a09890; text-transform: uppercase; letter-spacing: 0.06em; }
+    .chip-val { font-size: 13px; color: #43554f; font-weight: 400; margin-top: 1px; }
 
     .icon-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:4px 6px; border-radius:4px; color:#a09890; transition:color 0.15s, background 0.15s; }
     .icon-btn:hover { color:#43554f; background:#f0ece6; }
@@ -340,13 +372,13 @@ window.updatePreview = () => {
 function renderPreviewRows(containerId, loopsheid) {
   const dates = calcDates(loopsheid);
   const rows = [
-    { icon:'🔴', cls:'icon-loopsheid', label:'Loopsheid',      date: fmtShort(loopsheid),            note:'Dag 1' },
-    { icon:'🔑', cls:'icon-dekking',   label:'Dekking',         date: fmtShort(dates.dekking),         note:'Dag 10 na loopsheid' },
-    { icon:'🔬', cls:'icon-echo',      label:'Echo',            date: fmtShort(dates.echo),            note:'Dag 28 na dekking — dracht bevestigen' },
-    { icon:'🐶', cls:'icon-worp',      label:'Verwachte worp',  date: fmtRange(dates.worpFrom, dates.worpTo), note:'Dag 58–63 na dekking' },
+    { icon:'🔴', cls:'icon-loopsheid', rowCls:'row-loopsheid', label:'Loopsheid',      date: fmtShort(loopsheid),            note:'Dag 1' },
+    { icon:'🔑', cls:'icon-dekking',   rowCls:'row-dekking',   label:'Dekking',         date: fmtShort(dates.dekking),         note:'Dag 10 na loopsheid' },
+    { icon:'🔬', cls:'icon-echo',      rowCls:'row-echo',      label:'Echo',            date: fmtShort(dates.echo),            note:'Dag 28 na dekking — dracht bevestigen' },
+    { icon:'🐶', cls:'icon-worp',      rowCls:'row-worp',      label:'Verwachte worp',  date: fmtRange(dates.worpFrom, dates.worpTo), note:'Dag 58–63 na dekking' },
   ];
   document.getElementById(containerId).innerHTML = rows.map(r => `
-    <div class="preview-row">
+    <div class="preview-row ${r.rowCls}">
       <div class="preview-icon ${r.cls}">${r.icon}</div>
       <div class="preview-info">
         <div class="preview-label">${r.label}</div>
@@ -393,42 +425,34 @@ window.saveDracht = async () => {
   document.getElementById('saveBtn').disabled = false;
 };
 
-// ── planning table ────────────────────────────────────────
+// ── planning entries ──────────────────────────────────────
 function renderPlanning() {
   const container = document.getElementById('planningContainer');
   if (!planning.length) {
     container.innerHTML = '<p class="empty-state">Nog geen drachten gepland.</p>';
     return;
   }
-  container.innerHTML = `
-    <table class="planning-table">
-      <thead>
-        <tr>
-          <th>Hond</th>
-          <th>Loopsheid</th>
-          <th>Dekking</th>
-          <th>Echo</th>
-          <th>Worp</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        ${planning.map(p => `
-          <tr>
-            <td class="dog-name-cell">${esc(p.dogName)}</td>
-            <td class="date-cell">${fmtDateCell(p.loopsheidDate)}</td>
-            <td class="date-cell">${fmtDateCell(p.dekkingDate)}</td>
-            <td class="date-cell">${fmtDateCell(p.echoDate)}</td>
-            <td class="date-cell">${fmtDateCell(p.worpFromDate)} – ${fmtDateCell(p.worpToDate)}</td>
-            <td>
-              <div class="actions-cell">
-                <button class="icon-btn" onclick="openEditModal('${p.id}')" title="Bewerken">✎</button>
-                <button class="icon-btn delete" onclick="confirmDelete('${p.id}','${esc(p.dogName)}')" title="Verwijderen">✕</button>
-              </div>
-            </td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+  container.innerHTML = planning.map(p => {
+    const dogName = esc(p.dogName);
+    const avatar = (p.dogName || '?').charAt(0).toUpperCase();
+    return `
+      <div class="plan-entry">
+        <div class="plan-entry-top">
+          <div class="plan-entry-avatar">${avatar}</div>
+          <div class="plan-entry-dog">${dogName}</div>
+          <div class="plan-entry-actions">
+            <button class="icon-btn" onclick="openEditModal('${p.id}')" title="Bewerken">&#9998;</button>
+            <button class="icon-btn delete" onclick="confirmDelete('${p.id}','${dogName}')" title="Verwijderen">&#x2715;</button>
+          </div>
+        </div>
+        <div class="plan-entry-dates">
+          <div class="plan-date-chip"><span class="chip-label">Loopsheid</span><span class="chip-val">${fmtDateCell(p.loopsheidDate)}</span></div>
+          <div class="plan-date-chip"><span class="chip-label">Dekking</span><span class="chip-val">${fmtDateCell(p.dekkingDate)}</span></div>
+          <div class="plan-date-chip"><span class="chip-label">Echo</span><span class="chip-val">${fmtDateCell(p.echoDate)}</span></div>
+          <div class="plan-date-chip"><span class="chip-label">Worp</span><span class="chip-val">${fmtDateCell(p.worpFromDate)} &ndash; ${fmtDateCell(p.worpToDate)}</span></div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 const fmtDateCell = s => new Date(s + 'T00:00:00').toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
