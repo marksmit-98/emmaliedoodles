@@ -321,13 +321,15 @@ function calcDates(loopsheid) {
 }
 
 // ── auth ──────────────────────────────────────────────────
+// Show page immediately — no login gate
+document.getElementById('loadingCard').style.display = 'none';
+document.getElementById('mainContent').style.display = 'block';
+
+// Load data whenever Firebase session resolves (may fire slightly after page shows)
 onAuthStateChanged(auth, async user => {
-  if (user && ALLOWED.includes(user.email)) {
+  if (user && ALLOWED.includes(user.email) && !activeDogs.length) {
     await loadData();
   }
-  // Always show the page — Firebase session is optional
-  document.getElementById('loadingCard').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
 });
 
 async function loadData() {
