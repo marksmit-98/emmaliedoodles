@@ -356,6 +356,11 @@ function populateDogDropdowns() {
   const opts = activeDogs.map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('');
   document.getElementById('dogSelect').innerHTML     = `<option value="">Selecteer een hond...</option>${opts}`;
   document.getElementById('editDogSelect').innerHTML = opts;
+  const preselect = new URLSearchParams(window.location.search).get('dogId');
+  if (preselect) {
+    document.getElementById('dogSelect').value = preselect;
+    updatePreview();
+  }
 }
 
 // ── preview ───────────────────────────────────────────────

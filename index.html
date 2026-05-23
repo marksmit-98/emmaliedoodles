@@ -1322,33 +1322,9 @@ function renderKalender() {
   el.innerHTML = html;
 }
 
-// ── DEK MODAL ─────────────────────────────────────────
+// ── DEK → drachtplanner ───────────────────────────────
 window.openDekModal = dogId => {
-  const d    = dogs.find(x => x.id === dogId);
-  const today = isoDate(new Date());
-  setModal(`Dekking registreren — ${esc(d?.name || '')}`, `
-    <p style="font-size:14px;color:#5f6e5e;margin-bottom:20px;line-height:1.6">
-      De dekdatum wordt opgeslagen als nieuwe loopsheid (gedekt). De verwachte werpdatum
-      (dekdatum + 63 dagen) wordt direct doorgegeven aan de nestplanning.
-    </p>
-    <div class="form-group">
-      <label>Dekdatum *</label>
-      <input type="date" id="dekDate" value="${today}">
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-full" onclick="submitDek('${dogId}')">Opslaan &amp; naar nestplanning</button>
-      <button class="btn btn-outline" onclick="closeModal()">Annuleren</button>
-    </div>
-  `);
-};
-
-window.submitDek = async dogId => {
-  const dekDate = document.getElementById('dekDate').value;
-  if (!dekDate) { alert('Dekdatum is verplicht.'); return; }
-  const werpDatum = isoDate(addDays(parseDate(dekDate), 63));
-  await saveCycle({ dogId, startDate: dekDate, mated: true, notes: null }, null);
-  closeModal();
-  window.location.href = `nestplanning.html?geboortedatum=${werpDatum}`;
+  window.location.href = `drachtplanner.html?dogId=${encodeURIComponent(dogId)}`;
 };
 
 // ── modal helpers ─────────────────────────────────────
