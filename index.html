@@ -775,7 +775,7 @@ function allExpectedWindows(cycles) {
     results.push({
       from: parseDate(fromIso), to: parseDate(toIso),
       fromIso, toIso,
-      color: lastMated ? 'red' : 'green',
+      color: (isFirst && lastMated) ? 'red' : 'green',
     });
     centerIso = advanceCenter(centerIso, avg);
     isFirst   = false;
