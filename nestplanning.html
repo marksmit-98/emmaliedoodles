@@ -286,6 +286,39 @@
       white-space: nowrap;
       letter-spacing: 0.02em;
     }
+
+    .planning-group { margin-bottom: 24px; }
+
+    .planning-nest-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #a09890;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .planning-event {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f0ece6;
+    }
+    .planning-event:last-child { border-bottom: none; }
+
+    .planning-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #43554f;
+      flex-shrink: 0;
+    }
+
+    .planning-info { flex: 1; }
+
+    .planning-title { font-size: 14px; font-weight: 400; color: #282D33; }
+    .planning-date  { font-size: 12px; color: #a09890; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -320,6 +353,17 @@
 
     <div class="status" id="status"></div>
     <div class="event-list" id="eventList"></div>
+  </div>
+
+  <!-- Huidige nestplanning card -->
+  <div class="card" style="margin-top:16px">
+    <div style="font-family:'Fraunces',serif;font-weight:300;font-size:20px;color:#43554f;letter-spacing:-0.02em;margin-bottom:10px">Huidige nestplanning</div>
+    <p style="font-size:14px;color:#5f6e5e;margin-bottom:20px">Bekijk aankomende nestafspraken in de agenda</p>
+    <button class="btn btn-secondary" id="loadPlanningBtn" onclick="loadNestPlanning()">
+      Inloggen en planning tonen
+    </button>
+    <div class="status" id="statusLoad"></div>
+    <div id="nestPlanningList" style="margin-top:20px"></div>
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -543,10 +587,14 @@
         showStatus('Inloggen mislukt: ' + response.error, 'error');
         document.getElementById('planBtn').disabled = false;
         document.getElementById('updateBtn').disabled = false;
+        document.getElementById('loadPlanningBtn').disabled = false;
         return;
       }
       accessToken = response.access_token;
-      if (updateMode) {
+      if (pendingLoadPlanning) {
+        pendingLoadPlanning = false;
+        await doLoadNestPlanning();
+      } else if (updateMode) {
         updateMode = false;
         await updateAllEvents();
       } else {
@@ -697,6 +745,103 @@
 
     function showStatus(msg, type) {
       const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = 'status ' + type;
+    }
+
+    async function loadNestPlanning() {
+      if (typeof google === 'undefined') {
+        showStatusLoad('Google script nog niet geladen. Probeer opnieuw.', 'error'); return;
+      }
+      document.getElementById('loadPlanningBtn').disabled = true;
+      showStatusLoad('Planning ophalen...', 'info');
+
+      if (!accessToken) {
+        pendingLoadPlanning = true;
+        initTokenClient();
+        tokenClient.requestAccessToken({ prompt: '' });
+        return;
+      }
+      await doLoadNestPlanning();
+    }
+
+    let pendingLoadPlanning = false;
+
+    async function doLoadNestPlanning() {
+      let calendarId;
+      try { calendarId = await findCalendarId(); }
+      catch (e) { showStatusLoad(e.message, 'error'); document.getElementById('loadPlanningBtn').disabled = false; return; }
+
+      if (!calendarId) {
+        showStatusLoad(`Agenda "${CALENDAR_NAME}" niet gevonden.`, 'error');
+        document.getElementById('loadPlanningBtn').disabled = false; return;
+      }
+
+      const now      = new Date();
+      const timeMin  = encodeURIComponent(now.toISOString());
+      const future   = new Date(now); future.setMonth(future.getMonth() + 18);
+      const timeMax  = encodeURIComponent(future.toISOString());
+
+      let events = [], pageToken = null;
+      do {
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=250${pageToken ? '&pageToken=' + pageToken : ''}`;
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+        if (!res.ok) { showStatusLoad('Fout bij ophalen.', 'error'); document.getElementById('loadPlanningBtn').disabled = false; return; }
+        const data = await res.json();
+        events = events.concat(data.items || []);
+        pageToken = data.nextPageToken || null;
+      } while (pageToken);
+
+      const NEST_TITLES = ['Pups geboren', 'Ontwormen', 'Kennismakingsgesprekken', 'Vaccinatie', 'Puppy kijkmoment', 'Pups mogen vertrekken'];
+      const nestEvents = events.filter(e =>
+        e.status !== 'cancelled' && e.summary &&
+        NEST_TITLES.some(t => e.summary.startsWith(t)) &&
+        e.summary.includes(' – ')
+      );
+
+      const el = document.getElementById('nestPlanningList');
+      if (!nestEvents.length) {
+        el.innerHTML = '<p style="text-align:center;padding:24px 0;color:#a09890;font-size:14px">Geen aankomende nestafspraken gevonden.</p>';
+        showStatusLoad('', '');
+        document.getElementById('loadPlanningBtn').textContent = 'Planning vernieuwen';
+        document.getElementById('loadPlanningBtn').disabled = false; return;
+      }
+
+      const groups = {}, order = [];
+      for (const e of nestEvents) {
+        const match = e.summary.match(/–\s*(.+)$/);
+        const nest  = match ? match[1].trim() : 'Overig';
+        if (!groups[nest]) { groups[nest] = []; order.push(nest); }
+        groups[nest].push(e);
+      }
+
+      let html = '';
+      for (const nest of order) {
+        html += `<div class="planning-group"><div class="planning-nest-name">${nest}</div>`;
+        for (const e of groups[nest]) {
+          const dateStr = (e.start.date || e.start.dateTime || '').substring(0, 10);
+          const dateLabel = new Date(dateStr + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'long' });
+          html += `
+            <div class="planning-event">
+              <div class="planning-dot"></div>
+              <div class="planning-info">
+                <div class="planning-title">${e.summary.replace(/ –.*$/, '')}</div>
+                <div class="planning-date">${dateLabel}</div>
+              </div>
+            </div>`;
+        }
+        html += `</div>`;
+      }
+
+      el.innerHTML = html;
+      document.getElementById('statusLoad').style.display = 'none';
+      document.getElementById('loadPlanningBtn').textContent = 'Planning vernieuwen';
+      document.getElementById('loadPlanningBtn').disabled = false;
+    }
+
+    function showStatusLoad(msg, type) {
+      const el = document.getElementById('statusLoad');
+      if (!msg) { el.style.display = 'none'; return; }
       el.textContent = msg;
       el.className = 'status ' + type;
     }
