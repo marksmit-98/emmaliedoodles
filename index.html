@@ -716,11 +716,17 @@ function expectedWindow(cycles) {
 
 function allExpectedWindows(cycles) {
   if (!cycles.length) return [];
-  const horizon   = addMonths(new Date(), 26);
+  const now       = new Date();
+  const horizon   = addMonths(now, 26);
   const avg       = avgInterval(cycles);
   const lastMated = cycles[cycles.length - 1].mated;
   const results   = [];
   let w = expectedWindow(cycles);
+  let guard = 0;
+  while (w && w.to < now && guard++ < 60) {
+    const nextCenter = avg !== null ? addDays(w.center, Math.round(avg)) : addMonths(w.center, 6);
+    w = { from: addDays(nextCenter, -14), center: nextCenter, to: addDays(nextCenter, 28) };
+  }
   let isFirst = true;
   let i = 0;
   while (w && w.from <= horizon && i++ < 12) {
