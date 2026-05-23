@@ -494,7 +494,7 @@
     .cal-cell-red       { background: #f5a9a3; cursor: pointer; }
     .cal-cell-red:hover { background: #ef7f77; }
     .cal-cell-yellow    { background: #f5de82; }
-    .cal-cell-projected { background: #a8c9a8; }
+    .cal-cell-projected { background: #7bb87b; }
 
     .cal-table th { min-width: 52px; }
     .cal-scroll { margin-top: 16px; padding-bottom: 8px; width: 100vw; position: relative; left: 50%; transform: translateX(-50%); }
@@ -715,35 +715,62 @@ function expectedWindow(cycles) {
   return { from, center: addDays(from, 14), to: addDays(from, 42) };
 }
 
+// Advance a center ISO date by avg days (or 6 months as fallback)
+function advanceCenter(centerIso, avg) {
+  const c = parseDate(centerIso);
+  return isoDate(avg !== null ? addDays(c, Math.round(avg)) : addMonths(c, 6));
+}
+
 function allExpectedWindows(cycles) {
   if (!cycles.length) return [];
-  const now       = new Date();
-  const horizon   = addMonths(now, 26);
-  const avg       = avgInterval(cycles);
-  const lastMated = cycles[cycles.length - 1].mated;
-  const results   = [];
-  let w = expectedWindow(cycles);
+
+  const nowIso     = isoDate(new Date());
+  const horizonIso = isoDate(addMonths(new Date(), 26));
+  const avg        = avgInterval(cycles);
+  const lastMated  = cycles[cycles.length - 1].mated;
+
+  const first = expectedWindow(cycles);
+  if (!first) return [];
+
+  // Convert to ISO strings — avoids ALL Date-object comparison edge cases
+  let fromIso   = isoDate(first.from);
+  let centerIso = isoDate(first.center);
+  let toIso     = isoDate(first.to);
+
+  // Skip fully-elapsed windows using pure string comparison (no time-of-day issues)
   let guard = 0;
-  while (w && w.to < now && guard++ < 60) {
-    const nextCenter = avg !== null ? addDays(w.center, Math.round(avg)) : addMonths(w.center, 6);
-    w = { from: addDays(nextCenter, -14), center: nextCenter, to: addDays(nextCenter, 28) };
+  while (toIso < nowIso && guard++ < 60) {
+    centerIso = advanceCenter(centerIso, avg);
+    fromIso   = isoDate(addDays(parseDate(centerIso), -14));
+    toIso     = isoDate(addDays(parseDate(centerIso), 28));
   }
+
+  const results = [];
   let isFirst = true;
   let i = 0;
-  while (w && w.from <= horizon && i++ < 12) {
-    results.push({ ...w, color: isFirst ? (lastMated ? 'yellow' : 'red') : 'projected' });
-    const nextCenter = avg !== null ? addDays(w.center, Math.round(avg)) : addMonths(w.center, 6);
-    w = { from: addDays(nextCenter, -14), center: nextCenter, to: addDays(nextCenter, 28) };
-    isFirst = false;
+  while (fromIso <= horizonIso && i++ < 12) {
+    results.push({
+      from:    parseDate(fromIso),
+      to:      parseDate(toIso),
+      fromIso,
+      toIso,
+      color: isFirst ? (lastMated ? 'yellow' : 'red') : 'projected',
+    });
+    centerIso = advanceCenter(centerIso, avg);
+    fromIso   = isoDate(addDays(parseDate(centerIso), -14));
+    toIso     = isoDate(addDays(parseDate(centerIso), 28));
+    isFirst   = false;
   }
   return results;
 }
 
 function cellColor(dogId, year, month) {
-  const monthStart = new Date(year, month, 1);
-  const monthEnd   = new Date(year, month + 1, 0);
-  const windows    = allExpectedWindows(dogCycles(dogId));
-  const hit = windows.find(w => w.from <= monthEnd && w.to >= monthStart);
+  const mm      = String(month + 1).padStart(2, '0');
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const startIso = `${year}-${mm}-01`;
+  const endIso   = `${year}-${mm}-${String(lastDay).padStart(2, '0')}`;
+  const windows  = allExpectedWindows(dogCycles(dogId));
+  const hit      = windows.find(w => w.fromIso <= endIso && w.toIso >= startIso);
   return hit ? hit.color : null;
 }
 
@@ -1162,19 +1189,26 @@ function renderKalender() {
   }
 
   for (const d of active) {
-    html += `<tr><td class="cal-dog-col">${esc(d.name)}</td>`;
+    // Precompute windows once per dog, not once per cell
+    const windows = allExpectedWindows(dogCycles(d.id));
+    html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
       const md    = addMonths(now, i);
       const y     = md.getFullYear();
       const m     = md.getMonth();
+      const mm    = String(m + 1).padStart(2, '0');
+      const last  = new Date(y, m + 1, 0).getDate();
+      const startIso = `${y}-${mm}-01`;
+      const endIso   = `${y}-${mm}-${String(last).padStart(2, '0')}`;
       const isNow = m === now.getMonth() && y === now.getFullYear();
-      const color = cellColor(d.id, y, m);
+      const hit   = windows.find(w => w.fromIso <= endIso && w.toIso >= startIso);
+      const color = hit ? hit.color : null;
 
       let cls = '';
-      if (color === 'red')        cls = 'cal-cell-red';
-      else if (color === 'yellow')    cls = 'cal-cell-yellow';
-      else if (color === 'projected') cls = 'cal-cell-projected';
-      else if (isNow)             cls = 'cal-cell-now';
+      if (color === 'red')             cls = 'cal-cell-red';
+      else if (color === 'yellow')     cls = 'cal-cell-yellow';
+      else if (color === 'projected')  cls = 'cal-cell-projected';
+      else if (isNow)                  cls = 'cal-cell-now';
 
       const clickable = color === 'red'
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
