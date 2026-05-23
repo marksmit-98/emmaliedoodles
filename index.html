@@ -912,7 +912,8 @@ window.confirmDeleteDog = id => {
 // ── LOOPSHEDEN ────────────────────────────────────────
 function renderLoopsheden() {
   const el = document.getElementById('tab-loopsheden');
-  if (!selectedDogId && dogs.length) selectedDogId = dogs[0].id;
+  const activeDogs = dogs.filter(d => d.status !== 'Gepensioneerd');
+  if (!selectedDogId && activeDogs.length) selectedDogId = activeDogs[0].id;
 
   let html = `
     <div class="section-header">
@@ -920,7 +921,7 @@ function renderLoopsheden() {
       ${selectedDogId ? `<button class="btn btn-sm" onclick="openCycleModal(null)">+ Toevoegen</button>` : ''}
     </div>
     <div class="dog-selector">
-      ${dogs.map(d => `
+      ${activeDogs.map(d => `
         <div class="dog-chip ${d.id === selectedDogId ? 'active' : ''}"
              onclick="selectDog('${d.id}')">${esc(d.name)}</div>
       `).join('')}
@@ -1017,7 +1018,7 @@ window.confirmDeleteCycle = id => {
 // ── FOKPLANNING ───────────────────────────────────────
 function renderFokplanning() {
   const el     = document.getElementById('tab-fokplanning');
-  const active = dogs.filter(d => d.status === 'Actief');
+  const active = dogs.filter(d => d.status !== 'Gepensioneerd');
   const now    = new Date();
 
   let html = `
@@ -1074,7 +1075,7 @@ function renderFokplanning() {
 // ── KALENDER ──────────────────────────────────────────
 function renderKalender() {
   const el     = document.getElementById('tab-kalender');
-  const active = dogs.filter(d => d.status === 'Actief');
+  const active = dogs.filter(d => d.status !== 'Gepensioneerd');
   const now    = new Date();
 
   let html = `
@@ -1082,8 +1083,8 @@ function renderKalender() {
       <span class="section-title">Kalender</span>
     </div>
     <div class="legend">
-      <div class="legend-item"><span class="dot dot-red"></span> Verwachte loopsheid — niet gedekt</div>
-      <div class="legend-item"><span class="dot dot-yellow"></span> Verwachte loopsheid — al gedekt</div>
+      <div class="legend-item"><span class="dot dot-red"></span> Verwachte loopsheid — dekking niet mogelijk</div>
+      <div class="legend-item"><span class="dot dot-yellow"></span> Verwachte loopsheid — dekking mogelijk</div>
     </div>
     <div class="cal-scroll">
       <table class="cal-table">
