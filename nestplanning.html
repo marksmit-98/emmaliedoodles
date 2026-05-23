@@ -48,14 +48,10 @@
       letter-spacing: -0.02em;
     }
 
-    .back-btn {
-      font-family: 'Public Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 400;
-      color: #5f6e5e;
-      text-decoration: none;
-    }
-    .back-btn:hover { color: #43554f; }
+    .nav-links { display: flex; align-items: center; gap: 16px; }
+    .nav-link { font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 400; color: #5f6e5e; text-decoration: none; }
+    .nav-link:hover { color: #43554f; }
+    .nav-link.active { color: #43554f; font-weight: 500; border-bottom: 2px solid #43554f; padding-bottom: 1px; }
 
     .card {
       background: #faf8f5;
@@ -347,7 +343,11 @@
 <body>
   <header class="app-header">
     <span class="app-header-title">Emmaliedoodles</span>
-    <a href="index.html" class="back-btn">&#8592; Fokprogramma</a>
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">Fokprogramma</a>
+      <a href="drachtplanner.html" class="nav-link">Drachtplanner</a>
+      <a href="nestplanning.html" class="nav-link active">Nestplanning</a>
+    </nav>
   </header>
 
   <div class="card">
@@ -390,12 +390,11 @@
   <!-- Huidige nestplanning card -->
   <div class="card" style="margin-top:16px">
     <div class="card-title">Huidige nestplanning</div>
-    <p style="font-size:14px;color:#5f6e5e;margin-bottom:20px">Bekijk aankomende nestafspraken in de agenda</p>
-    <button class="btn btn-secondary" id="loadPlanningBtn" onclick="loadNestPlanning()">
-      Inloggen en planning tonen
-    </button>
     <div class="status" id="statusLoad"></div>
-    <div id="nestPlanningList" style="margin-top:20px"></div>
+    <div id="nestPlanningList"></div>
+    <button class="btn btn-secondary" id="loadPlanningBtn" onclick="loadNestPlanning()" style="display:none;margin-top:16px">
+      ↻ Vernieuwen
+    </button>
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -799,6 +798,14 @@
 
     let pendingLoadPlanning = false;
 
+    // Auto-load planning silently after page is ready
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (typeof google !== 'undefined') loadNestPlanning();
+        else document.getElementById('loadPlanningBtn').style.display = 'block';
+      }, 800);
+    });
+
     async function doLoadNestPlanning() {
       let calendarId;
       try { calendarId = await findCalendarId(); }
@@ -835,7 +842,7 @@
       if (!nestEvents.length) {
         el.innerHTML = '<p style="text-align:center;padding:24px 0;color:#a09890;font-size:14px">Geen aankomende nestafspraken gevonden.</p>';
         showStatusLoad('', '');
-        document.getElementById('loadPlanningBtn').textContent = 'Planning vernieuwen';
+        document.getElementById('loadPlanningBtn').style.display = 'block';
         document.getElementById('loadPlanningBtn').disabled = false; return;
       }
 
@@ -867,8 +874,10 @@
 
       el.innerHTML = html;
       document.getElementById('statusLoad').style.display = 'none';
-      document.getElementById('loadPlanningBtn').textContent = 'Planning vernieuwen';
-      document.getElementById('loadPlanningBtn').disabled = false;
+      const btn = document.getElementById('loadPlanningBtn');
+      btn.textContent = '↻ Vernieuwen';
+      btn.style.display = 'block';
+      btn.disabled = false;
     }
 
     function showStatusLoad(msg, type) {

@@ -40,8 +40,10 @@
       z-index: 100;
     }
     .app-header-title { font-family:'Fraunces',serif; font-weight:300; font-size:20px; color:#43554f; letter-spacing:-0.02em; }
-    .back-btn { font-family:'Public Sans',sans-serif; font-size:13px; font-weight:400; color:#5f6e5e; text-decoration:none; }
-    .back-btn:hover { color:#43554f; }
+    .nav-links { display:flex; align-items:center; gap:16px; }
+    .nav-link { font-family:'Public Sans',sans-serif; font-size:13px; font-weight:400; color:#5f6e5e; text-decoration:none; }
+    .nav-link:hover { color:#43554f; }
+    .nav-link.active { color:#43554f; font-weight:500; border-bottom:2px solid #43554f; padding-bottom:1px; }
 
     .card {
       background: #faf8f5;
@@ -192,7 +194,11 @@
 <body>
   <header class="app-header">
     <span class="app-header-title">Emmaliedoodles</span>
-    <a href="index.html" class="back-btn">&#8592; Fokprogramma</a>
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">Fokprogramma</a>
+      <a href="drachtplanner.html" class="nav-link active">Drachtplanner</a>
+      <a href="nestplanning.html" class="nav-link">Nestplanning</a>
+    </nav>
   </header>
 
   <div id="loadingCard" class="card" style="text-align:center;color:#a09890;padding:48px">Laden...</div>
