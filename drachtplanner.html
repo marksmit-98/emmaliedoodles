@@ -324,17 +324,10 @@ function calcDates(loopsheid) {
 onAuthStateChanged(auth, async user => {
   if (user && ALLOWED.includes(user.email)) {
     await loadData();
-    document.getElementById('loadingCard').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-  } else if (!user) {
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (e) {
-      document.getElementById('loadingCard').textContent = 'Inloggen vereist. Open Fokprogramma en log in.';
-    }
-  } else {
-    document.getElementById('loadingCard').textContent = 'Geen toegang voor dit account.';
   }
+  // Always show the page — Firebase session is optional
+  document.getElementById('loadingCard').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
 });
 
 async function loadData() {
