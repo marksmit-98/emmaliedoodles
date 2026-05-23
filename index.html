@@ -490,11 +490,10 @@
       min-width: 110px;
     }
 
-    .cal-cell-now       { background: #f4f1ec; }
-    .cal-cell-red       { background: #f5a9a3; cursor: pointer; }
-    .cal-cell-red:hover { background: #ef7f77; }
-    .cal-cell-yellow    { background: #f5de82; }
-    .cal-cell-projected { background: #7bb87b; }
+    .cal-cell-now        { background: #f4f1ec; }
+    .cal-cell-green      { background: #7bb87b; }
+    .cal-cell-red        { background: #f5a9a3; cursor: pointer; }
+    .cal-cell-red:hover  { background: #ef7f77; }
 
     .cal-table th { min-width: 52px; }
     .cal-scroll { margin-top: 16px; padding-bottom: 8px; width: 100vw; position: relative; left: 50%; transform: translateX(-50%); }
@@ -776,7 +775,7 @@ function allExpectedWindows(cycles) {
     results.push({
       from: parseDate(fromIso), to: parseDate(toIso),
       fromIso, toIso,
-      color: isFirst ? (lastMated ? 'yellow' : 'red') : 'projected',
+      color: lastMated ? 'red' : 'green',
     });
     centerIso = advanceCenter(centerIso, avg);
     isFirst   = false;
@@ -892,6 +891,12 @@ function renderTab() {
   if (currentTab === 'loopsheden')  renderLoopsheden();
   if (currentTab === 'fokplanning') renderFokplanning();
   if (currentTab === 'kalender')    renderKalender();
+}
+
+function renderAllDataTabs() {
+  renderLoopsheden();
+  renderFokplanning();
+  renderKalender();
 }
 
 // ── badge ─────────────────────────────────────────────
@@ -1114,12 +1119,12 @@ window.submitCycle = async id => {
     notes:     document.getElementById('cNotes').value.trim() || null,
   }, id || null);
   closeModal();
-  renderLoopsheden();
+  renderAllDataTabs();
 };
 
 window.confirmDeleteCycle = id => {
   if (!confirm('Deze loopsheid verwijderen?')) return;
-  removeCycle(id).then(() => { closeModal(); renderLoopsheden(); });
+  removeCycle(id).then(() => { closeModal(); renderAllDataTabs(); });
 };
 
 // ── FOKPLANNING ───────────────────────────────────────
@@ -1204,9 +1209,8 @@ function renderKalender() {
       <button class="sub-tab${kalenderFilter === 'In opbouw' ? ' sub-tab-active' : ''}" onclick="setKalenderFilter('In opbouw')">In opbouw</button>
     </div>
     <div class="legend">
-      <div class="legend-item"><span class="dot dot-red"></span> Loopsheid verwacht — vorige niet gedekt</div>
-      <div class="legend-item"><span class="dot dot-yellow"></span> Loopsheid verwacht — vorige wel gedekt</div>
-      <div class="legend-item"><span class="dot" style="background:#a8c9a8"></span> Prognose (verdere toekomst)</div>
+      <div class="legend-item"><span class="dot" style="background:#7bb87b"></span> Nest mogelijk — vorige loopsheid niet gedekt</div>
+      <div class="legend-item"><span class="dot dot-red"></span> Nest niet mogelijk — vorige loopsheid gedekt</div>
     </div>
     <div class="cal-scroll">
       <table class="cal-table">
@@ -1242,10 +1246,9 @@ function renderKalender() {
       const color = hit ? hit.color : null;
 
       let cls = '';
-      if (color === 'red')             cls = 'cal-cell-red';
-      else if (color === 'yellow')     cls = 'cal-cell-yellow';
-      else if (color === 'projected')  cls = 'cal-cell-projected';
-      else if (isNow)                  cls = 'cal-cell-now';
+      if (color === 'red')        cls = 'cal-cell-red';
+      else if (color === 'green') cls = 'cal-cell-green';
+      else if (isNow)             cls = 'cal-cell-now';
 
       const clickable = color === 'red'
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
