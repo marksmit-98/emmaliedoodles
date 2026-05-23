@@ -255,6 +255,7 @@
     <div class="header">
       <h1>Nestplanning</h1>
       <p>Emmaliedoodles &mdash; Australian Labradoodles</p>
+      <p style="margin-top:10px"><a href="fokkerij.html" style="font-size:13px;color:#5f6e5e;text-decoration:none;font-weight:400">Fokkerij &amp; loopsheidplanning &rarr;</a></p>
     </div>
 
     <div class="form-group">
@@ -681,6 +682,9 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
+    // prefill geboortedatum vanuit fokkerij 1-klik koppeling
+    const _p = new URLSearchParams(window.location.search);
+    if (_p.get('geboortedatum')) document.getElementById('geboortedatum').value = _p.get('geboortedatum');
   </script>
 </body>
 </html>

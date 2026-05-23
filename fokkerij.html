@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fokkerij — Emmaliedoodles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=Public+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Public Sans', system-ui, sans-serif;
+      font-weight: 300;
+      background: #f4f1ec;
+      min-height: 100vh;
+    }
+
+    /* ── login ── */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 4px;
+      padding: 48px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-card h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 28px;
+      color: #43554f;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      font-size: 14px;
+      color: #5f6e5e;
+      margin-bottom: 32px;
+    }
+
+    /* ── app shell ── */
+    #app { display: none; }
+
+    .app-header {
+      background: white;
+      border-bottom: 1px solid #e8e4de;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-header-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 20px;
+      color: #43554f;
+      letter-spacing: -0.02em;
+    }
+
+    .app-header-right { display: flex; align-items: center; gap: 12px; }
+
+    .header-link {
+      font-size: 13px;
+      color: #5f6e5e;
+      text-decoration: none;
+      font-weight: 400;
+    }
+    .header-link:hover { color: #43554f; }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid #d6d0c8;
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-family: 'Public Sans', sans-serif;
+      font-size: 12px;
+      color: #5f6e5e;
+      cursor: pointer;
+    }
+    .logout-btn:hover { border-color: #43554f; color: #43554f; }
+
+    /* ── tabs ── */
+    .tab-nav {
+      background: white;
+      border-bottom: 1px solid #e8e4de;
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-family: 'Public Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: #a09890;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn.active { color: #43554f; border-bottom-color: #43554f; font-weight: 500; }
+
+    /* ── content ── */
+    .tab-content {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── section ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 22px;
+      color: #43554f;
+      letter-spacing: -0.02em;
+    }
+
+    .group-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #a09890;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 24px 0 10px;
+    }
+
+    /* ── cards ── */
+    .card {
+      background: white;
+      border-radius: 4px;
+      border: 1px solid #e8e4de;
+      overflow: hidden;
+    }
+    .card + .card { margin-top: 8px; }
+
+    .card-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 12px;
+      border-bottom: 1px solid #f0ece6;
+    }
+    .card-row:last-child { border-bottom: none; }
+    .card-row:hover { background: #faf8f5; }
+
+    .card-main { flex: 1; min-width: 0; cursor: pointer; }
+
+    .card-name { font-size: 15px; font-weight: 400; color: #282D33; }
+    .card-sub { font-size: 12px; color: #a09890; margin-top: 2px; }
+
+    /* ── badges ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+    .badge-actief     { background: #edf2ef; color: #2e5240; }
+    .badge-inopbouw   { background: #fef9ec; color: #8a6a00; }
+    .badge-gepensioneerd { background: #f0ece6; color: #8a7a70; }
+
+    /* ── buttons ── */
+    .btn {
+      padding: 12px 20px;
+      background: #43554f;
+      color: white;
+      border: none;
+      border-radius: 100px;
+      font-family: 'Public Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #5f6e5e; }
+
+    .btn-outline {
+      background: white;
+      color: #43554f;
+      border: 1.5px solid #43554f;
+    }
+    .btn-outline:hover { background: #f4f1ec; }
+
+    .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+    .btn-danger {
+      background: white;
+      color: #c0392b;
+      border: 1.5px solid #c0392b;
+    }
+    .btn-danger:hover { background: #fdf0ef; }
+
+    .btn-full { width: 100%; }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #a09890;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { background: #f0ece6; color: #43554f; }
+
+    /* ── forms ── */
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #43554f;
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #d6d0c8;
+      border-radius: 2px;
+      font-family: 'Public Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: #282D33;
+      background: #faf8f5;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #43554f;
+      background: white;
+    }
+    textarea { resize: vertical; min-height: 72px; }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    .toggle-label { font-size: 14px; color: #282D33; }
+
+    .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #d6d0c8;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: #43554f; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    /* ── dog chips ── */
+    .dog-selector {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin-bottom: 20px;
+      padding-bottom: 2px;
+    }
+    .dog-selector::-webkit-scrollbar { display: none; }
+
+    .dog-chip {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      border: 1.5px solid #d6d0c8;
+      background: white;
+      color: #5f6e5e;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: 'Public Sans', sans-serif;
+    }
+    .dog-chip.active { border-color: #43554f; background: #43554f; color: white; }
+
+    /* ── loopsheid timeline ── */
+    .cycle-list { background: white; border: 1px solid #e8e4de; border-radius: 4px; padding: 0 16px; }
+
+    .cycle-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0ece6;
+    }
+    .cycle-item:last-child { border-bottom: none; }
+
+    .cycle-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #43554f;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .cycle-dot.mated { background: #a3b0ab; }
+
+    .cycle-info { flex: 1; }
+    .cycle-date { font-size: 14px; font-weight: 400; color: #282D33; }
+    .cycle-meta { font-size: 12px; color: #a09890; margin-top: 2px; }
+
+    .cycle-interval {
+      font-size: 11px;
+      color: #5f6e5e;
+      background: #edf0ef;
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    .avg-bar {
+      background: white;
+      border: 1px solid #e8e4de;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #5f6e5e;
+    }
+    .avg-bar strong { color: #282D33; }
+
+    /* ── fokplanning cards ── */
+    .plan-card {
+      background: white;
+      border: 1px solid #e8e4de;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .plan-dog-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: #282D33;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .plan-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid #f0ece6;
+      font-size: 13px;
+      gap: 12px;
+    }
+    .plan-row:last-of-type { border-bottom: none; }
+    .plan-key { color: #a09890; flex-shrink: 0; }
+    .plan-val { color: #282D33; font-weight: 400; text-align: right; }
+
+    .plan-action { margin-top: 14px; }
+
+    /* ── kalender ── */
+    .cal-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 16px -16px 0;
+    }
+
+    .cal-table {
+      border-collapse: collapse;
+      font-size: 12px;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .cal-table th {
+      padding: 8px 10px;
+      text-align: center;
+      font-weight: 500;
+      color: #a09890;
+      white-space: nowrap;
+      background: white;
+      border-bottom: 1px solid #e8e4de;
+    }
+
+    .cal-th-now { background: #f4f1ec !important; color: #43554f !important; }
+
+    .cal-table td {
+      padding: 10px 8px;
+      text-align: center;
+      border: 1px solid #f0ece6;
+      white-space: nowrap;
+    }
+
+    .cal-dog-col {
+      text-align: left !important;
+      font-weight: 400;
+      color: #282D33;
+      font-size: 13px;
+      background: white;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      padding-left: 16px !important;
+      border-left: none;
+      min-width: 110px;
+    }
+
+    .cal-cell-now  { background: #f4f1ec; }
+    .cal-cell-red  { background: #fde8e6; cursor: pointer; }
+    .cal-cell-red:hover { background: #f9c9c4; }
+    .cal-cell-yellow { background: #fef9e7; }
+
+    .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .dot-red    { background: #e74c3c; }
+    .dot-yellow { background: #f0b429; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #5f6e5e;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+
+    /* ── empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #a09890;
+      font-size: 14px;
+    }
+
+    /* ── modal ── */
+    #modalOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    #modalOverlay.open { display: flex; }
+
+    @media (min-width: 560px) {
+      #modalOverlay { align-items: center; }
+      .modal { border-radius: 8px; }
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      max-width: 480px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 24px 20px 32px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 20px;
+      color: #43554f;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #a09890;
+      cursor: pointer;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+    }
+    .modal-close:hover { background: #f0ece6; }
+
+    .modal-footer { margin-top: 20px; display: flex; gap: 10px; }
+
+    /* ── inline messages ── */
+    .msg {
+      padding: 12px 16px;
+      border-radius: 2px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+    .msg.error { background: #fdf0ef; color: #8b3a32; border-left: 3px solid #c0392b; display: block; }
+    .msg.info  { background: #edf0ef; color: #43554f; border-left: 3px solid #43554f; display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ────────────────────────────────────────── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Emmaliedoodles</h1>
+    <p>Fokkerij &amp; loopsheidplanning</p>
+    <button class="btn btn-full" onclick="signIn()">Inloggen met Google</button>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+</div>
+
+<!-- ── APP ──────────────────────────────────────────── -->
+<div id="app">
+  <header class="app-header">
+    <span class="app-header-title">Emmaliedoodles</span>
+    <div class="app-header-right">
+      <a href="index.html" class="header-link">Nestplanning</a>
+      <button class="logout-btn" onclick="doSignOut()">Uitloggen</button>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active"  onclick="switchTab('teefjes')">Teefjes</button>
+    <button class="tab-btn"         onclick="switchTab('loopsheden')">Loopsheden</button>
+    <button class="tab-btn"         onclick="switchTab('fokplanning')">Fokplanning</button>
+    <button class="tab-btn"         onclick="switchTab('kalender')">Kalender</button>
+  </nav>
+
+  <div class="tab-content">
+    <div id="tab-teefjes"    class="tab-panel active"></div>
+    <div id="tab-loopsheden" class="tab-panel"></div>
+    <div id="tab-fokplanning" class="tab-panel"></div>
+    <div id="tab-kalender"   class="tab-panel"></div>
+  </div>
+</div>
+
+<!-- ── MODAL ────────────────────────────────────────── -->
+<div id="modalOverlay" onclick="maybeCloseModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc }
+  from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+// ── config ────────────────────────────────────────────
+const ALLOWED = ['mark.smit1998@gmail.com', 'doodledelux@gmail.com'];
+const MONTHS  = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+
+const fbApp = initializeApp({
+  apiKey:            "AIzaSyASmYheBLtR2VKAtMw396RUIC_iUT65FMg",
+  authDomain:        "emmaliedoodles-7f93e.firebaseapp.com",
+  projectId:         "emmaliedoodles-7f93e",
+  storageBucket:     "emmaliedoodles-7f93e.firebasestorage.app",
+  messagingSenderId: "513871307896",
+  appId:             "1:513871307896:web:27349ccaf037c548f4b98d",
+});
+const auth = getAuth(fbApp);
+const db   = getFirestore(fbApp);
+
+// ── state ─────────────────────────────────────────────
+let dogs = [], heatCycles = [], nests = [];
+let selectedDogId = null;
+let currentTab = 'teefjes';
+
+// ── date helpers ──────────────────────────────────────
+const parseDate  = s => new Date(s + 'T00:00:00');
+const isoDate    = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addDays    = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const addMonths  = (d, n) => { const r = new Date(d); r.setMonth(r.getMonth() + n); return r; };
+const daysBetween = (a, b) => Math.round((b - a) / 86400000);
+const fmtDate    = s => parseDate(s).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+const fmtShort   = s => parseDate(s).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+
+function fmtInterval(days) {
+  if (days === null || days === undefined) return '—';
+  const d = Math.round(days);
+  const m = Math.floor(d / 30.4375);
+  const r = Math.round(d - m * 30.4375);
+  return `${d} d (${m} mnd ${r} d)`;
+}
+
+// ── calculations ──────────────────────────────────────
+function dogCycles(dogId) {
+  return heatCycles
+    .filter(c => c.dogId === dogId)
+    .sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
+}
+
+function avgInterval(cycles) {
+  if (cycles.length < 2) return null;
+  let total = 0;
+  for (let i = 1; i < cycles.length; i++)
+    total += daysBetween(parseDate(cycles[i-1].startDate), parseDate(cycles[i].startDate));
+  return total / (cycles.length - 1);
+}
+
+function expectedWindow(cycles) {
+  if (!cycles.length) return null;
+  const latest = parseDate(cycles[cycles.length - 1].startDate);
+  const avg    = avgInterval(cycles);
+  const center = avg !== null ? addDays(latest, Math.round(avg)) : addMonths(latest, 6);
+  return { from: addDays(center, -14), center, to: addDays(center, 28) };
+}
+
+function cellColor(dogId, year, month) {
+  const cycles = dogCycles(dogId);
+  if (!cycles.length) return null;
+  const w = expectedWindow(cycles);
+  if (!w) return null;
+  const start = new Date(year, month, 1);
+  const end   = new Date(year, month + 1, 0);
+  if (w.from > end || w.to < start) return null;
+  return cycles[cycles.length - 1].mated ? 'yellow' : 'red';
+}
+
+// ── firestore helpers ─────────────────────────────────
+async function loadAll() {
+  const [ds, cs] = await Promise.all([
+    getDocs(collection(db, 'dogs')),
+    getDocs(collection(db, 'heatCycles')),
+  ]);
+  dogs      = ds.docs.map(d => ({ id: d.id, ...d.data() }))
+                     .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+  heatCycles = cs.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function saveDog(data, id) {
+  if (id) {
+    await updateDoc(doc(db, 'dogs', id), data);
+    const i = dogs.findIndex(d => d.id === id);
+    dogs[i] = { id, ...data };
+  } else {
+    const ref = await addDoc(collection(db, 'dogs'), data);
+    dogs.push({ id: ref.id, ...data });
+  }
+  dogs.sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+}
+
+async function removeDog(id) {
+  const cycles = heatCycles.filter(c => c.dogId === id);
+  await Promise.all([
+    deleteDoc(doc(db, 'dogs', id)),
+    ...cycles.map(c => deleteDoc(doc(db, 'heatCycles', c.id))),
+  ]);
+  dogs       = dogs.filter(d => d.id !== id);
+  heatCycles = heatCycles.filter(c => c.dogId !== id);
+}
+
+async function saveCycle(data, id) {
+  if (id) {
+    await updateDoc(doc(db, 'heatCycles', id), data);
+    const i = heatCycles.findIndex(c => c.id === id);
+    heatCycles[i] = { id, ...data };
+  } else {
+    const ref = await addDoc(collection(db, 'heatCycles'), data);
+    heatCycles.push({ id: ref.id, ...data });
+  }
+}
+
+async function removeCycle(id) {
+  await deleteDoc(doc(db, 'heatCycles', id));
+  heatCycles = heatCycles.filter(c => c.id !== id);
+}
+
+// ── auth ──────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (user && ALLOWED.includes(user.email)) {
+    document.getElementById('loginScreen').style.display = 'none';
+    await loadAll();
+    document.getElementById('app').style.display = 'block';
+    renderTab();
+  } else {
+    if (user) {
+      await signOut(auth);
+      showLoginMsg('Dit account heeft geen toegang.');
+    }
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+window.signIn = async () => {
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch (e) {
+    showLoginMsg('Inloggen mislukt: ' + e.message);
+  }
+};
+
+window.doSignOut = () => signOut(auth);
+
+function showLoginMsg(msg) {
+  const el = document.getElementById('loginMsg');
+  el.textContent = msg;
+  el.className = 'msg error';
+}
+
+// ── tab routing ───────────────────────────────────────
+window.switchTab = tab => {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['teefjes','loopsheden','fokplanning','kalender'][i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  renderTab();
+};
+
+function renderTab() {
+  if (currentTab === 'teefjes')     renderTeefjes();
+  if (currentTab === 'loopsheden')  renderLoopsheden();
+  if (currentTab === 'fokplanning') renderFokplanning();
+  if (currentTab === 'kalender')    renderKalender();
+}
+
+// ── badge ─────────────────────────────────────────────
+function badge(status) {
+  const cls = { 'Actief': 'actief', 'In opbouw': 'inopbouw', 'Gepensioneerd': 'gepensioneerd' };
+  return `<span class="badge badge-${cls[status] || 'actief'}">${status}</span>`;
+}
+
+// ── TEEFJES ───────────────────────────────────────────
+function renderTeefjes() {
+  const el = document.getElementById('tab-teefjes');
+  const groups = [
+    { label: 'Actief',         list: dogs.filter(d => d.status === 'Actief') },
+    { label: 'In opbouw',      list: dogs.filter(d => d.status === 'In opbouw') },
+    { label: 'Gepensioneerd',  list: dogs.filter(d => d.status === 'Gepensioneerd') },
+  ].filter(g => g.list.length);
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Teefjes</span>
+      <button class="btn btn-sm" onclick="openDogModal(null)">+ Toevoegen</button>
+    </div>
+  `;
+
+  if (!dogs.length) {
+    html += `<div class="empty-state">Nog geen honden toegevoegd.</div>`;
+  } else {
+    for (const g of groups) {
+      html += `<div class="group-label">${g.label}</div><div class="card">`;
+      for (const d of g.list) {
+        const n = heatCycles.filter(c => c.dogId === d.id).length;
+        html += `
+          <div class="card-row">
+            <div class="card-main" onclick="openDogModal('${d.id}')">
+              <div class="card-name">${esc(d.name)}</div>
+              <div class="card-sub">
+                ${d.birthDate ? fmtDate(d.birthDate) : 'Geboortedatum onbekend'}
+                &middot; ${n} loopsheid${n !== 1 ? 'en' : ''}
+              </div>
+            </div>
+            ${badge(d.status)}
+            <button class="icon-btn" onclick="openDogModal('${d.id}')" title="Bewerken">✎</button>
+          </div>
+        `;
+      }
+      html += `</div>`;
+    }
+  }
+  el.innerHTML = html;
+}
+
+window.openDogModal = id => {
+  const d = id ? dogs.find(x => x.id === id) : null;
+  setModal(d ? `${esc(d.name)} bewerken` : 'Hond toevoegen', `
+    <div class="form-group">
+      <label>Naam *</label>
+      <input type="text" id="fNaam" value="${esc(d?.name || '')}" placeholder="Bijv. Emma" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Geboortedatum</label>
+      <input type="date" id="fGeb" value="${d?.birthDate || ''}">
+    </div>
+    <div class="form-group">
+      <label>Stamboomnaam</label>
+      <input type="text" id="fStam" value="${esc(d?.pedigree || '')}" placeholder="Officiële stamboomnaam">
+    </div>
+    <div class="form-group">
+      <label>Kleur</label>
+      <input type="text" id="fKleur" value="${esc(d?.color || '')}" placeholder="Bijv. chocolade">
+    </div>
+    <div class="form-group">
+      <label>Gastgezin</label>
+      <input type="text" id="fGast" value="${esc(d?.fosterFamily || '')}" placeholder="Naam gastgezin">
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="fStatus">
+        ${['Actief','In opbouw','Gepensioneerd'].map(s =>
+          `<option ${d?.status === s ? 'selected' : ''}>${s}</option>`
+        ).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notities</label>
+      <textarea id="fNotes">${esc(d?.notes || '')}</textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-full" onclick="submitDog('${id || ''}')">Opslaan</button>
+      ${d ? `<button class="btn btn-danger" onclick="confirmDeleteDog('${id}')">Verwijderen</button>` : ''}
+    </div>
+  `);
+};
+
+window.submitDog = async id => {
+  const name = document.getElementById('fNaam').value.trim();
+  if (!name) { alert('Naam is verplicht.'); return; }
+  await saveDog({
+    name,
+    birthDate:    document.getElementById('fGeb').value   || null,
+    pedigree:     document.getElementById('fStam').value.trim()  || null,
+    color:        document.getElementById('fKleur').value.trim() || null,
+    fosterFamily: document.getElementById('fGast').value.trim()  || null,
+    status:       document.getElementById('fStatus').value,
+    notes:        document.getElementById('fNotes').value.trim() || null,
+  }, id || null);
+  closeModal();
+  renderTeefjes();
+};
+
+window.confirmDeleteDog = id => {
+  const d = dogs.find(x => x.id === id);
+  if (!confirm(`"${d.name}" verwijderen? Alle loopsheden van deze hond worden ook verwijderd.`)) return;
+  removeDog(id).then(() => { closeModal(); renderTeefjes(); });
+};
+
+// ── LOOPSHEDEN ────────────────────────────────────────
+function renderLoopsheden() {
+  const el = document.getElementById('tab-loopsheden');
+  if (!selectedDogId && dogs.length) selectedDogId = dogs[0].id;
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Loopsheden</span>
+      ${selectedDogId ? `<button class="btn btn-sm" onclick="openCycleModal(null)">+ Toevoegen</button>` : ''}
+    </div>
+    <div class="dog-selector">
+      ${dogs.map(d => `
+        <div class="dog-chip ${d.id === selectedDogId ? 'active' : ''}"
+             onclick="selectDog('${d.id}')">${esc(d.name)}</div>
+      `).join('')}
+    </div>
+  `;
+
+  if (!selectedDogId) {
+    html += `<div class="empty-state">Voeg eerst een hond toe.</div>`;
+    el.innerHTML = html; return;
+  }
+
+  const cycles = dogCycles(selectedDogId);
+  const avg    = avgInterval(cycles);
+
+  if (!cycles.length) {
+    html += `<div class="empty-state">Nog geen loopsheden voor deze hond.</div>`;
+  } else {
+    html += `<div class="cycle-list">`;
+    for (let i = cycles.length - 1; i >= 0; i--) {
+      const c        = cycles[i];
+      const interval = i > 0
+        ? daysBetween(parseDate(cycles[i-1].startDate), parseDate(c.startDate))
+        : null;
+      html += `
+        <div class="cycle-item">
+          <div class="cycle-dot ${c.mated ? 'mated' : ''}"></div>
+          <div class="cycle-info">
+            <div class="cycle-date">${fmtDate(c.startDate)}</div>
+            <div class="cycle-meta">
+              ${c.mated ? 'Gedekt' : 'Niet gedekt'}
+              ${c.notes ? ` &middot; ${esc(c.notes)}` : ''}
+            </div>
+            ${interval !== null ? `<span class="cycle-interval">Interval: ${fmtInterval(interval)}</span>` : ''}
+          </div>
+          <button class="icon-btn" onclick="openCycleModal('${c.id}')" title="Bewerken">✎</button>
+        </div>
+      `;
+    }
+    html += `</div>`;
+    if (avg !== null) {
+      html += `<div class="avg-bar">Gemiddeld interval: <strong>${fmtInterval(avg)}</strong></div>`;
+    }
+  }
+
+  el.innerHTML = html;
+}
+
+window.selectDog = id => { selectedDogId = id; renderLoopsheden(); };
+
+window.openCycleModal = id => {
+  const c   = id ? heatCycles.find(x => x.id === id) : null;
+  const dog = dogs.find(d => d.id === selectedDogId);
+  setModal(c ? 'Loopsheid bewerken' : `Loopsheid toevoegen — ${esc(dog?.name || '')}`, `
+    <div class="form-group">
+      <label>Startdatum *</label>
+      <input type="date" id="cDate" value="${c?.startDate || ''}">
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Gedekt</span>
+      <label class="toggle">
+        <input type="checkbox" id="cMated" ${c?.mated ? 'checked' : ''}>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>Notities</label>
+      <input type="text" id="cNotes" value="${esc(c?.notes || '')}" placeholder="Bijv. naam reu, kliniek">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-full" onclick="submitCycle('${id || ''}')">Opslaan</button>
+      ${c ? `<button class="btn btn-danger" onclick="confirmDeleteCycle('${id}')">Verwijderen</button>` : ''}
+    </div>
+  `);
+};
+
+window.submitCycle = async id => {
+  const startDate = document.getElementById('cDate').value;
+  if (!startDate) { alert('Datum is verplicht.'); return; }
+  await saveCycle({
+    dogId:     selectedDogId,
+    startDate,
+    mated:     document.getElementById('cMated').checked,
+    notes:     document.getElementById('cNotes').value.trim() || null,
+  }, id || null);
+  closeModal();
+  renderLoopsheden();
+};
+
+window.confirmDeleteCycle = id => {
+  if (!confirm('Deze loopsheid verwijderen?')) return;
+  removeCycle(id).then(() => { closeModal(); renderLoopsheden(); });
+};
+
+// ── FOKPLANNING ───────────────────────────────────────
+function renderFokplanning() {
+  const el     = document.getElementById('tab-fokplanning');
+  const active = dogs.filter(d => d.status === 'Actief');
+  const now    = new Date();
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Fokplanning</span>
+    </div>
+  `;
+
+  if (!active.length) {
+    html += `<div class="empty-state">Geen actieve teefjes.</div>`;
+    el.innerHTML = html; return;
+  }
+
+  for (const d of active) {
+    const cycles = dogCycles(d.id);
+    const last   = cycles.at(-1) ?? null;
+    const avg    = avgInterval(cycles);
+    const w      = expectedWindow(cycles);
+
+    const inWindow = w && w.from <= now && now <= w.to;
+    const showDek  = last && !last.mated && inWindow;
+
+    html += `
+      <div class="plan-card">
+        <div class="plan-dog-name">${esc(d.name)} ${badge(d.status)}</div>
+        <div class="plan-row">
+          <span class="plan-key">Laatste loopsheid</span>
+          <span class="plan-val">${last ? fmtDate(last.startDate) : '—'}</span>
+        </div>
+        <div class="plan-row">
+          <span class="plan-key">Laatste gedekt</span>
+          <span class="plan-val">${last ? (last.mated ? 'Ja' : 'Nee') : '—'}</span>
+        </div>
+        <div class="plan-row">
+          <span class="plan-key">Gemiddeld interval</span>
+          <span class="plan-val">${fmtInterval(avg)}</span>
+        </div>
+        <div class="plan-row">
+          <span class="plan-key">Verwacht venster</span>
+          <span class="plan-val">${w ? `${fmtShort(isoDate(w.from))} – ${fmtShort(isoDate(w.to))}` : '—'}</span>
+        </div>
+        ${showDek ? `
+          <div class="plan-action">
+            <button class="btn btn-sm" onclick="openDekModal('${d.id}')">Dek registreren</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── KALENDER ──────────────────────────────────────────
+function renderKalender() {
+  const el     = document.getElementById('tab-kalender');
+  const active = dogs.filter(d => d.status === 'Actief');
+  const now    = new Date();
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Kalender</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="dot dot-red"></span> Verwachte loopsheid — niet gedekt</div>
+      <div class="legend-item"><span class="dot dot-yellow"></span> Verwachte loopsheid — al gedekt</div>
+    </div>
+    <div class="cal-scroll">
+      <table class="cal-table">
+        <thead><tr>
+          <th class="cal-dog-col"></th>
+  `;
+
+  for (let i = 0; i < 24; i++) {
+    const d    = addMonths(now, i);
+    const isNow = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    html += `<th ${isNow ? 'class="cal-th-now"' : ''}>${MONTHS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}</th>`;
+  }
+
+  html += `</tr></thead><tbody>`;
+
+  if (!active.length) {
+    html += `<tr><td colspan="25" style="text-align:center;padding:32px;color:#a09890">Geen actieve teefjes.</td></tr>`;
+  }
+
+  for (const d of active) {
+    html += `<tr><td class="cal-dog-col">${esc(d.name)}</td>`;
+    for (let i = 0; i < 24; i++) {
+      const md    = addMonths(now, i);
+      const y     = md.getFullYear();
+      const m     = md.getMonth();
+      const isNow = m === now.getMonth() && y === now.getFullYear();
+      const color = cellColor(d.id, y, m);
+
+      let cls = '';
+      if (color === 'red')    cls = 'cal-cell-red';
+      else if (color === 'yellow') cls = 'cal-cell-yellow';
+      else if (isNow)         cls = 'cal-cell-now';
+
+      const clickable = color === 'red'
+        ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
+        : '';
+
+      html += `
+        <td class="${cls}" ${clickable}>
+          ${color === 'red'    ? '<span class="dot dot-red"></span>' : ''}
+          ${color === 'yellow' ? '<span class="dot dot-yellow"></span>' : ''}
+        </td>
+      `;
+    }
+    html += `</tr>`;
+  }
+
+  html += `</tbody></table></div>`;
+  el.innerHTML = html;
+}
+
+// ── DEK MODAL ─────────────────────────────────────────
+window.openDekModal = dogId => {
+  const d    = dogs.find(x => x.id === dogId);
+  const today = isoDate(new Date());
+  setModal(`Dekking registreren — ${esc(d?.name || '')}`, `
+    <p style="font-size:14px;color:#5f6e5e;margin-bottom:20px;line-height:1.6">
+      De dekdatum wordt opgeslagen als nieuwe loopsheid (gedekt). De verwachte werpdatum
+      (dekdatum + 63 dagen) wordt direct doorgegeven aan de nestplanning.
+    </p>
+    <div class="form-group">
+      <label>Dekdatum *</label>
+      <input type="date" id="dekDate" value="${today}">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-full" onclick="submitDek('${dogId}')">Opslaan &amp; naar nestplanning</button>
+      <button class="btn btn-outline" onclick="closeModal()">Annuleren</button>
+    </div>
+  `);
+};
+
+window.submitDek = async dogId => {
+  const dekDate = document.getElementById('dekDate').value;
+  if (!dekDate) { alert('Dekdatum is verplicht.'); return; }
+  const werpDatum = isoDate(addDays(parseDate(dekDate), 63));
+  await saveCycle({ dogId, startDate: dekDate, mated: true, notes: null }, null);
+  closeModal();
+  window.location.href = `index.html?geboortedatum=${werpDatum}`;
+};
+
+// ── modal helpers ─────────────────────────────────────
+function setModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+window.closeModal      = () => document.getElementById('modalOverlay').classList.remove('open');
+window.maybeCloseModal = e  => { if (e.target === document.getElementById('modalOverlay')) closeModal(); };
+
+// ── XSS helper ────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
