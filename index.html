@@ -676,8 +676,13 @@ function expectedWindow(cycles) {
   if (!cycles.length) return null;
   const latest = parseDate(cycles[cycles.length - 1].startDate);
   const avg    = avgInterval(cycles);
-  const center = avg !== null ? addDays(latest, Math.round(avg)) : addMonths(latest, 6);
-  return { from: addDays(center, -14), center, to: addDays(center, 28) };
+  if (avg !== null) {
+    const center = addDays(latest, Math.round(avg));
+    return { from: addDays(center, -14), center, to: addDays(center, 28) };
+  }
+  // fallback: EDATE(laatste, 6) is de vanaf-datum zelf, niet het middelpunt
+  const from = addMonths(latest, 6);
+  return { from, center: addDays(from, 14), to: addDays(from, 42) };
 }
 
 function cellColor(dogId, year, month) {
