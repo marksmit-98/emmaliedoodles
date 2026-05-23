@@ -689,6 +689,7 @@ let selectedDogId = null;
 let currentTab = 'teefjes';
 let kalenderFilter    = 'Actief';
 let fokplanningFilter = 'Actief';
+let loopshedenFilter  = 'Actief';
 
 // ── date helpers ──────────────────────────────────────
 const parseDate  = s => new Date(s + 'T00:00:00');
@@ -1008,11 +1009,13 @@ window.confirmDeleteDog = id => {
 };
 
 // ── LOOPSHEDEN ────────────────────────────────────────
+window.setLoopshedenFilter = filter => { loopshedenFilter = filter; selectedDogId = null; renderLoopsheden(); };
+
 function renderLoopsheden() {
-  const el = document.getElementById('tab-loopsheden');
-  const activeDogs = dogs.filter(d => d.status === 'Actief');
-  if (!selectedDogId || !activeDogs.find(d => d.id === selectedDogId)) {
-    selectedDogId = activeDogs[0]?.id ?? null;
+  const el         = document.getElementById('tab-loopsheden');
+  const shownDogs  = dogs.filter(d => d.status === loopshedenFilter);
+  if (!selectedDogId || !shownDogs.find(d => d.id === selectedDogId)) {
+    selectedDogId = shownDogs[0]?.id ?? null;
   }
 
   let html = `
@@ -1021,9 +1024,13 @@ function renderLoopsheden() {
       ${selectedDogId ? `<button class="btn btn-sm" onclick="openCycleModal(null)">+ Toevoegen</button>` : ''}
     </div>
     <p class="section-sub">Historie en invoer van loopsheden per hond</p>
+    <div class="sub-tabs">
+      <button class="sub-tab${loopshedenFilter === 'Actief' ? ' sub-tab-active' : ''}" onclick="setLoopshedenFilter('Actief')">Actief</button>
+      <button class="sub-tab${loopshedenFilter === 'In opbouw' ? ' sub-tab-active' : ''}" onclick="setLoopshedenFilter('In opbouw')">In opbouw</button>
+    </div>
     <div class="form-group select-wrap" style="margin-bottom:20px">
       <select id="dogSelect" onchange="selectDog(this.value)">
-        ${activeDogs.map(d => `<option value="${d.id}" ${d.id === selectedDogId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
+        ${shownDogs.map(d => `<option value="${d.id}" ${d.id === selectedDogId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
       </select>
     </div>
   `;
