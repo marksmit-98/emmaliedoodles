@@ -507,6 +507,24 @@
     .dot-red    { background: #e74c3c; }
     .dot-yellow { background: #f0b429; }
 
+    .sub-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sub-tab {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid #c8d5c4;
+      background: none;
+      font-size: 13px;
+      color: #5f6e5e;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sub-tab:hover { background: #f0f4ef; }
+    .sub-tab-active { background: #43554f; color: #fff; border-color: #43554f; }
+
     .legend {
       display: flex;
       flex-wrap: wrap;
@@ -669,6 +687,7 @@ const db   = getFirestore(fbApp);
 let dogs = [], heatCycles = [], nests = [];
 let selectedDogId = null;
 let currentTab = 'teefjes';
+let kalenderFilter = 'Actief';
 
 // ── date helpers ──────────────────────────────────────
 const parseDate  = s => new Date(s + 'T00:00:00');
@@ -691,6 +710,8 @@ function fmtInterval(days) {
 function dogCycles(dogId) {
   return heatCycles
     .filter(c => c.dogId === dogId)
+    .map(c => ({ ...c, startDate: c.startDate || c.date || c.loopsheidDate || null }))
+    .filter(c => c.startDate)
     .sort((a, b) => parseDate(a.startDate) - parseDate(b.startDate));
 }
 
@@ -1155,16 +1176,22 @@ function renderFokplanning() {
 }
 
 // ── KALENDER ──────────────────────────────────────────
+window.setKalenderFilter = filter => { kalenderFilter = filter; renderKalender(); };
+
 function renderKalender() {
-  const el     = document.getElementById('tab-kalender');
-  const active = dogs.filter(d => d.status !== 'Gepensioneerd');
-  const now    = new Date();
+  const el   = document.getElementById('tab-kalender');
+  const now  = new Date();
+  const shown = dogs.filter(d => d.status === kalenderFilter);
 
   let html = `
     <div class="section-header">
       <span class="section-title">Kalender</span>
     </div>
     <p class="section-sub">Maandoverzicht van verwachte loopsheden</p>
+    <div class="sub-tabs">
+      <button class="sub-tab${kalenderFilter === 'Actief' ? ' sub-tab-active' : ''}" onclick="setKalenderFilter('Actief')">Actief</button>
+      <button class="sub-tab${kalenderFilter === 'In opbouw' ? ' sub-tab-active' : ''}" onclick="setKalenderFilter('In opbouw')">In opbouw</button>
+    </div>
     <div class="legend">
       <div class="legend-item"><span class="dot dot-red"></span> Dekking niet mogelijk</div>
       <div class="legend-item"><span class="dot dot-yellow"></span> Dekking mogelijk</div>
@@ -1184,12 +1211,11 @@ function renderKalender() {
 
   html += `</tr></thead><tbody>`;
 
-  if (!active.length) {
-    html += `<tr><td colspan="25" style="text-align:center;padding:32px;color:#a09890">Geen actieve teefjes.</td></tr>`;
+  if (!shown.length) {
+    html += `<tr><td colspan="25" style="text-align:center;padding:32px;color:#a09890">Geen ${kalenderFilter.toLowerCase()} teefjes.</td></tr>`;
   }
 
-  for (const d of active) {
-    // Precompute windows once per dog, not once per cell
+  for (const d of shown) {
     const windows = allExpectedWindows(dogCycles(d.id));
     html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
