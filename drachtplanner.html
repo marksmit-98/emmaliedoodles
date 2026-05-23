@@ -332,9 +332,9 @@ function calcDates(loopsheid) {
 document.getElementById('loadingCard').style.display = 'none';
 document.getElementById('mainContent').style.display = 'block';
 
-// Pre-fill dogs from sessionStorage (set by index.html on navigation)
+// Pre-fill dogs from localStorage (written by index.html after login)
 try {
-  const cached = sessionStorage.getItem('activeDogs');
+  const cached = localStorage.getItem('activeDogs');
   if (cached) activeDogs = JSON.parse(cached);
   if (activeDogs.length) populateDogDropdowns();
 } catch(e) {}

@@ -848,6 +848,11 @@ async function loadAll() {
   dogs      = ds.docs.map(d => ({ id: d.id, ...d.data() }))
                      .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
   heatCycles = cs.docs.map(d => ({ id: d.id, ...d.data() }));
+  try {
+    localStorage.setItem('activeDogs', JSON.stringify(
+      dogs.filter(d => d.status === 'Actief').map(d => ({ id: d.id, name: d.name }))
+    ));
+  } catch(e) {}
 }
 
 async function saveDog(data, id) {
@@ -1324,9 +1329,7 @@ function renderKalender() {
 
 // ── DEK → drachtplanner ───────────────────────────────
 window.openDekModal = dogId => {
-  sessionStorage.setItem('activeDogs', JSON.stringify(
-    dogs.filter(d => d.status === 'Actief').map(d => ({ id: d.id, name: d.name }))
-  ));
+  // localStorage already written by loadAll() — no need to repeat here
   window.location.href = `drachtplanner.html?dogId=${encodeURIComponent(dogId)}`;
 };
 
