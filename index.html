@@ -157,22 +157,68 @@
 
     .group-label {
       font-size: 11px;
-      font-weight: 500;
-      color: #a09890;
+      font-weight: 600;
+      color: #43554f;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin: 24px 0 10px;
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .group-label-count {
+      font-weight: 400;
+      color: #a09890;
+      letter-spacing: 0;
     }
 
-    /* ── cards ── */
+    /* ── dog cards ── */
+    .dog-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #faf8f5;
+      border: 1px solid #e8e4de;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .dog-card:hover {
+      border-color: #b8c9b4;
+      box-shadow: 0 2px 10px rgba(67,85,79,0.08);
+    }
+    .dog-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: #43554f;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 500;
+      flex-shrink: 0;
+      letter-spacing: 0;
+    }
+    .dog-avatar-inopbouw      { background: #b89a40; }
+    .dog-avatar-gepensioneerd { background: #b0a89e; }
+    .dog-info { flex: 1; min-width: 0; }
+    .dog-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; flex-wrap: wrap; }
+    .dog-name { font-size: 15px; font-weight: 500; color: #282D33; }
+    .dog-pedigree { font-size: 12px; color: #8a7a70; font-style: italic; margin-bottom: 4px; }
+    .dog-meta { font-size: 12px; color: #a09890; display: flex; gap: 4px; flex-wrap: wrap; }
+    .dog-meta-sep { color: #d6d0c8; }
+
+    /* ── legacy card (kept for other uses) ── */
     .card {
-      background: white;
+      background: #faf8f5;
       border-radius: 4px;
       border: 1px solid #e8e4de;
       overflow: hidden;
     }
     .card + .card { margin-top: 8px; }
-
     .card-row {
       display: flex;
       align-items: center;
@@ -181,10 +227,8 @@
       border-bottom: 1px solid #f0ece6;
     }
     .card-row:last-child { border-bottom: none; }
-    .card-row:hover { background: #faf8f5; }
-
+    .card-row:hover { background: #f0ece6; }
     .card-main { flex: 1; min-width: 0; cursor: pointer; }
-
     .card-name { font-size: 15px; font-weight: 400; color: #282D33; }
     .card-sub { font-size: 12px; color: #a09890; margin-top: 2px; }
 
@@ -927,24 +971,37 @@ function renderTeefjes() {
     html += `<div class="empty-state">Nog geen honden toegevoegd.</div>`;
   } else {
     for (const g of groups) {
-      html += `<div class="group-label">${g.label}</div><div class="card">`;
+      const avatarCls = g.label === 'In opbouw' ? 'dog-avatar-inopbouw'
+                      : g.label === 'Gepensioneerd' ? 'dog-avatar-gepensioneerd' : '';
+      html += `<div class="group-label">${g.label} <span class="group-label-count">${g.list.length}</span></div>`;
       for (const d of g.list) {
-        const n = heatCycles.filter(c => c.dogId === d.id).length;
+        const n       = heatCycles.filter(c => c.dogId === d.id).length;
+        const initial = esc(d.name.charAt(0).toUpperCase());
+        const meta    = [
+          d.birthDate ? fmtDate(d.birthDate) : null,
+          d.color     ? esc(d.color) : null,
+          d.fosterFamily ? esc(d.fosterFamily) : null,
+          `${n} loopsheid${n !== 1 ? 'en' : ''}`,
+        ].filter(Boolean);
         html += `
-          <div class="card-row">
-            <div class="card-main" onclick="openDogModal('${d.id}')">
-              <div class="card-name">${esc(d.name)}</div>
-              <div class="card-sub">
-                ${d.birthDate ? fmtDate(d.birthDate) : 'Geboortedatum onbekend'}
-                &middot; ${n} loopsheid${n !== 1 ? 'en' : ''}
+          <div class="dog-card" onclick="openDogModal('${d.id}')">
+            <div class="dog-avatar ${avatarCls}">${initial}</div>
+            <div class="dog-info">
+              <div class="dog-name-row">
+                <span class="dog-name">${esc(d.name)}</span>
+                ${badge(d.status)}
+              </div>
+              ${d.pedigree ? `<div class="dog-pedigree">${esc(d.pedigree)}</div>` : ''}
+              <div class="dog-meta">
+                ${meta.map((m, i) => i < meta.length - 1
+                  ? `<span>${m}</span><span class="dog-meta-sep">·</span>`
+                  : `<span>${m}</span>`).join('')}
               </div>
             </div>
-            ${badge(d.status)}
-            <button class="icon-btn" onclick="openDogModal('${d.id}')" title="Bewerken">✎</button>
+            <button class="icon-btn" onclick="event.stopPropagation();openDogModal('${d.id}')" title="Bewerken">✎</button>
           </div>
         `;
       }
-      html += `</div>`;
     }
   }
   el.innerHTML = html;
