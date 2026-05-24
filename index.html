@@ -998,7 +998,7 @@ onAuthStateChanged(auth, async user => {
   } else {
     if (user) {
       await signOut(auth);
-      showLoginMsg('Dit account heeft geen toegang.');
+      showLoginMsg('Dit account heeft geen toegang: ' + user.email);
     }
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
