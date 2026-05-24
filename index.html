@@ -476,7 +476,10 @@
     .dog-chip.active { border-color: #43554f; background: #43554f; color: white; }
 
     /* ── loopsheid timeline ── */
-    .cycle-list { background: #faf8f5; border: 1px solid #e8e4de; border-radius: 4px; padding: 0 16px; }
+    .cycles-dog-section { margin-bottom: 28px; }
+    .cycles-dog-header { font-family:'Fraunces',serif; font-weight:300; font-size:18px; color:#43554f; letter-spacing:-0.02em; display:flex; align-items:center; gap:8px; padding-bottom:10px; margin-bottom:2px; border-bottom:2px solid #e8e4de; }
+    .cycles-empty { font-size:13px; color:#a09890; padding:12px 0; }
+    .cycle-list { background: #faf8f5; border: 1px solid #e8e4de; border-radius: 8px; padding: 0 16px; }
 
     .cycle-item {
       display: flex;
@@ -806,7 +809,6 @@ const db   = getFirestore(fbApp);
 
 // ── state ─────────────────────────────────────────────
 let dogs = [], heatCycles = [], nests = [];
-let selectedDogId = null;
 let currentTab = 'teefjes';
 let kalenderFilter    = 'Actief';
 let fokplanningFilter = 'Actief';
@@ -1154,79 +1156,84 @@ window.confirmDeleteDog = id => {
 };
 
 // ── LOOPSHEDEN ────────────────────────────────────────
-window.setLoopshedenFilter = filter => { loopshedenFilter = filter; selectedDogId = null; renderLoopsheden(); };
+window.setLoopshedenFilter = filter => { loopshedenFilter = filter; renderLoopsheden(); };
 
 function renderLoopsheden() {
-  const el         = document.getElementById('tab-loopsheden');
-  const shownDogs  = dogs.filter(d => d.status === loopshedenFilter);
-  if (!selectedDogId || !shownDogs.find(d => d.id === selectedDogId)) {
-    selectedDogId = shownDogs[0]?.id ?? null;
-  }
+  const el        = document.getElementById('tab-loopsheden');
+  const shownDogs = dogs.filter(d => d.status === loopshedenFilter);
 
   let html = `
     <div class="section-header">
       <span class="section-title">Loopsheden</span>
-      ${selectedDogId ? `<button class="btn btn-sm" onclick="openCycleModal(null)">+ Toevoegen</button>` : ''}
+      <button class="btn btn-sm" onclick="openCycleModal(null)">+ Toevoegen</button>
     </div>
-    <p class="section-sub">Historie en invoer van loopsheden per hond</p>
+    <p class="section-sub">Historie per hond</p>
     <div class="sub-tabs">
       <button class="sub-tab${loopshedenFilter === 'Actief' ? ' sub-tab-active' : ''}" onclick="setLoopshedenFilter('Actief')">Actief</button>
       <button class="sub-tab${loopshedenFilter === 'In opbouw' ? ' sub-tab-active' : ''}" onclick="setLoopshedenFilter('In opbouw')">In opbouw</button>
     </div>
-    <div class="form-group select-wrap" style="margin-bottom:20px">
-      <select id="dogSelect" onchange="selectDog(this.value)">
-        ${shownDogs.map(d => `<option value="${d.id}" ${d.id === selectedDogId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
-      </select>
-    </div>
   `;
 
-  if (!selectedDogId) {
-    html += `<div class="empty-state">Voeg eerst een hond toe.</div>`;
+  if (!shownDogs.length) {
+    html += `<div class="empty-state">Geen ${loopshedenFilter.toLowerCase()} honden.</div>`;
     el.innerHTML = html; return;
   }
 
-  const cycles = dogCycles(selectedDogId);
-  const avg    = avgInterval(cycles);
+  for (const d of shownDogs) {
+    const cycles = dogCycles(d.id);
+    const avg    = avgInterval(cycles);
 
-  if (!cycles.length) {
-    html += `<div class="empty-state">Nog geen loopsheden voor deze hond.</div>`;
-  } else {
-    html += `<div class="cycle-list">`;
-    for (let i = cycles.length - 1; i >= 0; i--) {
-      const c        = cycles[i];
-      const interval = i > 0
-        ? daysBetween(parseDate(cycles[i-1].startDate), parseDate(c.startDate))
-        : null;
-      html += `
-        <div class="cycle-item">
-          <div class="cycle-dot ${c.mated ? 'mated' : ''}"></div>
-          <div class="cycle-info">
-            <div class="cycle-date">${fmtDate(c.startDate)}</div>
-            <div class="cycle-meta">
-              ${c.mated ? 'Gedekt' : 'Niet gedekt'}
-              ${c.notes ? ` &middot; ${esc(c.notes)}` : ''}
+    html += `<div class="cycles-dog-section">`;
+    html += `<div class="cycles-dog-header">${esc(d.name)} ${badge(d.status)}</div>`;
+
+    if (!cycles.length) {
+      html += `<div class="cycles-empty">Nog geen loopsheden.</div>`;
+    } else {
+      html += `<div class="cycle-list">`;
+      for (let i = cycles.length - 1; i >= 0; i--) {
+        const c        = cycles[i];
+        const interval = i > 0
+          ? daysBetween(parseDate(cycles[i-1].startDate), parseDate(c.startDate))
+          : null;
+        html += `
+          <div class="cycle-item">
+            <div class="cycle-dot ${c.mated ? 'mated' : ''}"></div>
+            <div class="cycle-info">
+              <div class="cycle-date">${fmtDate(c.startDate)}</div>
+              <div class="cycle-meta">
+                ${c.mated ? 'Gedekt' : 'Niet gedekt'}
+                ${c.notes ? ` &middot; ${esc(c.notes)}` : ''}
+              </div>
+              ${interval !== null ? `<span class="cycle-interval">Interval: ${fmtInterval(interval)}</span>` : ''}
             </div>
-            ${interval !== null ? `<span class="cycle-interval">Interval: ${fmtInterval(interval)}</span>` : ''}
+            <button class="icon-btn" onclick="openCycleModal('${c.id}')" title="Bewerken">✎</button>
           </div>
-          <button class="icon-btn" onclick="openCycleModal('${c.id}')" title="Bewerken">✎</button>
-        </div>
-      `;
+        `;
+      }
+      html += `</div>`;
+      if (avg !== null) {
+        html += `<div class="avg-bar">Gemiddeld interval: <strong>${fmtInterval(avg)}</strong></div>`;
+      }
     }
     html += `</div>`;
-    if (avg !== null) {
-      html += `<div class="avg-bar">Gemiddeld interval: <strong>${fmtInterval(avg)}</strong></div>`;
-    }
   }
 
   el.innerHTML = html;
 }
 
-window.selectDog = id => { selectedDogId = id; renderLoopsheden(); };
-
 window.openCycleModal = id => {
   const c   = id ? heatCycles.find(x => x.id === id) : null;
-  const dog = dogs.find(d => d.id === selectedDogId);
-  setModal(c ? 'Loopsheid bewerken' : `Loopsheid toevoegen — ${esc(dog?.name || '')}`, `
+  const dog = c ? dogs.find(d => d.id === c.dogId) : null;
+  const allDogs = dogs.filter(d => d.status === 'Actief' || d.status === 'In opbouw')
+                      .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+  const dogField = c
+    ? `<div class="form-group"><label>Hond</label><input type="text" disabled value="${esc(dog?.name || '')}"></div>`
+    : `<div class="form-group"><label>Hond *</label><div class="select-wrap"><select id="cDogId">
+        <option value="">Selecteer een hond...</option>
+        ${allDogs.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('')}
+       </select></div></div>`;
+  setModal(c ? `Loopsheid bewerken — ${esc(dog?.name || '')}` : 'Loopsheid toevoegen', `
+    ${dogField}
     <div class="form-group">
       <label>Startdatum *</label>
       <input type="date" id="cDate" value="${c?.startDate || ''}">
@@ -1252,11 +1259,15 @@ window.openCycleModal = id => {
 window.submitCycle = async id => {
   const startDate = document.getElementById('cDate').value;
   if (!startDate) { alert('Datum is verplicht.'); return; }
+  const dogId = id
+    ? heatCycles.find(x => x.id === id)?.dogId
+    : document.getElementById('cDogId').value;
+  if (!dogId) { alert('Selecteer een hond.'); return; }
   await saveCycle({
-    dogId:     selectedDogId,
+    dogId,
     startDate,
-    mated:     document.getElementById('cMated').checked,
-    notes:     document.getElementById('cNotes').value.trim() || null,
+    mated: document.getElementById('cMated').checked,
+    notes: document.getElementById('cNotes').value.trim() || null,
   }, id || null);
   closeModal();
   renderAllDataTabs();
