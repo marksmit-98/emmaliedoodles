@@ -992,7 +992,13 @@ async function removeCycle(id) {
 onAuthStateChanged(auth, async user => {
   if (user && ALLOWED.includes(user.email)) {
     document.getElementById('loginScreen').style.display = 'none';
-    await loadAll();
+    try {
+      await loadAll();
+    } catch(e) {
+      document.getElementById('loginScreen').style.display = 'flex';
+      showLoginMsg('Fout bij laden: ' + e.message);
+      return;
+    }
     document.getElementById('app').style.display = 'block';
     renderTab();
   } else {
