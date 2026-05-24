@@ -1112,7 +1112,7 @@ window.openDogModal = id => {
   setModal(d ? `${esc(d.name)} bewerken` : 'Hond toevoegen', `
     <div class="form-group">
       <label>Naam *</label>
-      <input type="text" id="fNaam" value="${esc(d?.name || '')}" placeholder="Bijv. Emma" autocomplete="off">
+      <input type="text" id="fNaam" value="${esc(d?.name || '')}" placeholder="Naam van de hond" autocomplete="off">
     </div>
     <div class="form-group">
       <label>Geboortedatum</label>
@@ -1124,7 +1124,7 @@ window.openDogModal = id => {
     </div>
     <div class="form-group">
       <label>Kleur</label>
-      <input type="text" id="fKleur" value="${esc(d?.color || '')}" placeholder="Bijv. chocolade">
+      <input type="text" id="fKleur" value="${esc(d?.color || '')}" placeholder="Kleur van de hond">
     </div>
     <div class="form-group">
       <label>Gastgezin</label>
