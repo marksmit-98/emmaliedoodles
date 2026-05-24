@@ -1060,7 +1060,7 @@ function renderTeefjes() {
           d.birthDate ? fmtDate(d.birthDate) : null,
           d.color     ? esc(d.color) : null,
           d.fosterFamily ? esc(d.fosterFamily) : null,
-          `${n} loopsheid${n !== 1 ? 'en' : ''}`,
+          `${n} ${n !== 1 ? 'loopsheden' : 'loopsheid'}`,
         ].filter(Boolean);
         html += `
           <div class="dog-card" onclick="openDogModal('${d.id}')">
