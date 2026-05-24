@@ -33,6 +33,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      isolation: isolate;
     }
 
     .app-header-title {
@@ -47,6 +48,22 @@
     .nav-link { font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 400; color: #5f6e5e; text-decoration: none; }
     .nav-link:hover { color: #43554f; }
     .nav-link.active { color: #43554f; font-weight: 500; border-bottom: 2px solid #43554f; padding-bottom: 1px; }
+
+    .hamburger { display:none; flex-direction:column; justify-content:center; gap:5px; background:none; border:none; cursor:pointer; padding:4px; }
+    .hamburger span { display:block; width:22px; height:2px; background:#43554f; border-radius:2px; transition:all 0.2s; }
+    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu { display:none; position:absolute; top:100%; left:0; right:0; background:white; border-bottom:1px solid #e8e4de; box-shadow:0 4px 16px rgba(67,85,79,0.1); z-index:99; flex-direction:column; }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu-link { padding:16px 20px; font-family:'Public Sans',sans-serif; font-size:15px; font-weight:400; color:#43554f; text-decoration:none; border-bottom:1px solid #f0ece6; background:none; border-left:none; border-right:none; border-top:none; text-align:left; cursor:pointer; }
+    .mobile-menu-link:last-child { border-bottom:none; }
+
+    @media (max-width: 480px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+    }
 
     .card {
       background: #faf8f5;
@@ -237,6 +254,14 @@
       <a href="drachtplanner.html" class="nav-link">Drachtplanner</a>
       <a href="nestplanning.html" class="nav-link active">Nestplanner</a>
     </nav>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html" class="mobile-menu-link">Fokprogramma</a>
+      <a href="drachtplanner.html" class="mobile-menu-link">Drachtplanner</a>
+      <a href="nestplanning.html" class="mobile-menu-link">Nestplanner</a>
+    </div>
   </header>
 
   <div class="card">
@@ -678,6 +703,21 @@
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
     const _p = new URLSearchParams(window.location.search);
     if (_p.get('geboortedatum')) document.getElementById('geboortedatum').value = _p.get('geboortedatum');
+
+    function toggleMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const btn  = document.getElementById('hamburger');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+    }
+    document.addEventListener('click', e => {
+      const menu = document.getElementById('mobileMenu');
+      if (!menu.classList.contains('open')) return;
+      if (!menu.contains(e.target) && !document.getElementById('hamburger').contains(e.target)) {
+        menu.classList.remove('open');
+        document.getElementById('hamburger').classList.remove('open');
+      }
+    });
   </script>
   <script type="module">
     import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
