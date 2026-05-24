@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nestplanning - Emmaliedoodles</title>
+  <title>Nestplanner - Emmaliedoodles</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=Public+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -19,15 +19,10 @@
       font-weight: 300;
       background: #f4f1ec;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 0 40px;
+      padding: 0 0 60px;
     }
 
     .app-header {
-      width: 100%;
-      align-self: stretch;
       background: white;
       border-bottom: 1px solid #e8e4de;
       box-shadow: 0 1px 12px rgba(67,85,79,0.07);
@@ -59,14 +54,13 @@
       border: 1px solid #e8e4de;
       box-shadow: 0 2px 20px rgba(67,85,79,0.08);
       padding: 32px 24px;
-      width: 100%;
+      width: calc(100% - 32px);
       max-width: 560px;
-      margin-top: 24px;
+      margin: 24px auto 0;
     }
 
     @media (min-width: 480px) {
       .card { padding: 48px; }
-      body { padding: 0 16px 40px; }
     }
 
     .header {
@@ -233,111 +227,6 @@
       display: block;
     }
 
-    .event-list {
-      margin-top: 24px;
-      display: none;
-    }
-
-    .event-list-title {
-      font-size: 11px;
-      font-weight: 500;
-      color: #a09890;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 14px;
-    }
-
-    .event-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 0;
-      border-left: 3px solid #43554f;
-      padding-left: 14px;
-      margin-bottom: 8px;
-      transition: transform 0.15s;
-    }
-
-    .event-item:hover {
-      transform: translateX(2px);
-    }
-
-    .event-check {
-      width: 22px;
-      height: 22px;
-      background: linear-gradient(135deg, #43554f, #7bb87b);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      color: white;
-      font-size: 11px;
-    }
-
-    .event-info { flex: 1; }
-
-    .event-title {
-      font-size: 14px;
-      font-weight: 400;
-      color: #282D33;
-    }
-
-    .event-date {
-      font-size: 12px;
-      font-weight: 300;
-      color: #a09890;
-      margin-top: 2px;
-    }
-
-    .event-week {
-      font-size: 11px;
-      font-weight: 500;
-      color: #5f6e5e;
-      background: #edf0ef;
-      padding: 3px 10px;
-      border-radius: 100px;
-      white-space: nowrap;
-      letter-spacing: 0.02em;
-    }
-
-    .planning-group { margin-bottom: 24px; }
-
-    .planning-nest-name {
-      font-family: 'Fraunces', serif;
-      font-size: 16px;
-      font-weight: 300;
-      color: #43554f;
-      letter-spacing: -0.01em;
-      text-transform: none;
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e8e4de;
-    }
-
-    .planning-event {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 9px 0;
-      border-bottom: 1px solid #f0ece6;
-    }
-    .planning-event:last-child { border-bottom: none; }
-
-    .planning-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #43554f;
-      flex-shrink: 0;
-    }
-
-    .card-title { font-family:'Fraunces',serif; font-weight:300; font-size:22px; color:#43554f; letter-spacing:-0.02em; margin-bottom:4px; padding-bottom:16px; border-bottom:1px solid #e8e4de; }
-
-    .planning-info { flex: 1; }
-
-    .planning-title { font-size: 14px; font-weight: 400; color: #282D33; }
-    .planning-date  { font-size: 12px; color: #a09890; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -346,13 +235,13 @@
     <nav class="nav-links">
       <a href="index.html" class="nav-link">Fokprogramma</a>
       <a href="drachtplanner.html" class="nav-link">Drachtplanner</a>
-      <a href="nestplanning.html" class="nav-link active">Nestplanning</a>
+      <a href="nestplanning.html" class="nav-link active">Nestplanner</a>
     </nav>
   </header>
 
   <div class="card">
     <div class="header">
-      <h1>Nestplanning</h1>
+      <h1>Nestplanner</h1>
       <p>Emmaliedoodles &mdash; Australian Labradoodles</p>
     </div>
 
@@ -387,17 +276,7 @@
     <div class="event-list" id="eventList"></div>
   </div>
 
-  <!-- Huidige nestplanning card -->
-  <div class="card" style="margin-top:16px">
-    <div class="card-title">Huidige nestplanning</div>
-    <div class="status" id="statusLoad"></div>
-    <div id="nestPlanningList"></div>
-    <button class="btn btn-secondary" id="loadPlanningBtn" onclick="loadNestPlanning()" style="display:none;margin-top:16px">
-      ↻ Vernieuwen
-    </button>
-  </div>
-
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     const CLIENT_ID = '248696672626-0tcv73h1m27ekf2vc3k41vu5cb3l4sob.apps.googleusercontent.com';
     const SCOPES = 'https://www.googleapis.com/auth/calendar';
@@ -618,14 +497,10 @@
         showStatus('Inloggen mislukt: ' + response.error, 'error');
         document.getElementById('planBtn').disabled = false;
         document.getElementById('updateBtn').disabled = false;
-        document.getElementById('loadPlanningBtn').disabled = false;
         return;
       }
       accessToken = response.access_token;
-      if (pendingLoadPlanning) {
-        pendingLoadPlanning = false;
-        await doLoadNestPlanning();
-      } else if (updateMode) {
+      if (updateMode) {
         updateMode = false;
         await updateAllEvents();
       } else {
@@ -776,113 +651,6 @@
 
     function showStatus(msg, type) {
       const el = document.getElementById('status');
-      el.textContent = msg;
-      el.className = 'status ' + type;
-    }
-
-    async function loadNestPlanning() {
-      if (typeof google === 'undefined') {
-        showStatusLoad('Google script nog niet geladen. Probeer opnieuw.', 'error'); return;
-      }
-      document.getElementById('loadPlanningBtn').disabled = true;
-      showStatusLoad('Planning ophalen...', 'info');
-
-      if (!accessToken) {
-        pendingLoadPlanning = true;
-        initTokenClient();
-        tokenClient.requestAccessToken({ prompt: '' });
-        return;
-      }
-      await doLoadNestPlanning();
-    }
-
-    let pendingLoadPlanning = false;
-
-    // Auto-load planning silently after page is ready
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        if (typeof google !== 'undefined') loadNestPlanning();
-        else document.getElementById('loadPlanningBtn').style.display = 'block';
-      }, 800);
-    });
-
-    async function doLoadNestPlanning() {
-      let calendarId;
-      try { calendarId = await findCalendarId(); }
-      catch (e) { showStatusLoad(e.message, 'error'); document.getElementById('loadPlanningBtn').disabled = false; return; }
-
-      if (!calendarId) {
-        showStatusLoad(`Agenda "${CALENDAR_NAME}" niet gevonden.`, 'error');
-        document.getElementById('loadPlanningBtn').disabled = false; return;
-      }
-
-      const now      = new Date();
-      const timeMin  = encodeURIComponent(now.toISOString());
-      const future   = new Date(now); future.setMonth(future.getMonth() + 18);
-      const timeMax  = encodeURIComponent(future.toISOString());
-
-      let events = [], pageToken = null;
-      do {
-        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=250${pageToken ? '&pageToken=' + pageToken : ''}`;
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-        if (!res.ok) { showStatusLoad('Fout bij ophalen.', 'error'); document.getElementById('loadPlanningBtn').disabled = false; return; }
-        const data = await res.json();
-        events = events.concat(data.items || []);
-        pageToken = data.nextPageToken || null;
-      } while (pageToken);
-
-      const NEST_TITLES = ['Pups geboren', 'Ontwormen', 'Kennismakingsgesprekken', 'Vaccinatie', 'Puppy kijkmoment', 'Pups mogen vertrekken'];
-      const nestEvents = events.filter(e =>
-        e.status !== 'cancelled' && e.summary &&
-        NEST_TITLES.some(t => e.summary.startsWith(t)) &&
-        e.summary.includes(' – ')
-      );
-
-      const el = document.getElementById('nestPlanningList');
-      if (!nestEvents.length) {
-        el.innerHTML = '<p style="text-align:center;padding:24px 0;color:#a09890;font-size:14px">Geen aankomende nestafspraken gevonden.</p>';
-        showStatusLoad('', '');
-        document.getElementById('loadPlanningBtn').style.display = 'block';
-        document.getElementById('loadPlanningBtn').disabled = false; return;
-      }
-
-      const groups = {}, order = [];
-      for (const e of nestEvents) {
-        const match = e.summary.match(/–\s*(.+)$/);
-        const nest  = match ? match[1].trim() : 'Overig';
-        if (!groups[nest]) { groups[nest] = []; order.push(nest); }
-        groups[nest].push(e);
-      }
-
-      let html = '';
-      for (const nest of order) {
-        html += `<div class="planning-group"><div class="planning-nest-name">${nest}</div>`;
-        for (const e of groups[nest]) {
-          const dateStr = (e.start.date || e.start.dateTime || '').substring(0, 10);
-          const dateLabel = new Date(dateStr + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'long' });
-          html += `
-            <div class="planning-event">
-              <div class="planning-dot"></div>
-              <div class="planning-info">
-                <div class="planning-title">${e.summary.replace(/ –.*$/, '')}</div>
-                <div class="planning-date">${dateLabel}</div>
-              </div>
-            </div>`;
-        }
-        html += `</div>`;
-      }
-
-      el.innerHTML = html;
-      document.getElementById('statusLoad').style.display = 'none';
-      const btn = document.getElementById('loadPlanningBtn');
-      btn.textContent = '↻ Vernieuwen';
-      btn.style.display = 'block';
-      btn.disabled = false;
-    }
-
-    function showStatusLoad(msg, type) {
-      const el = document.getElementById('statusLoad');
-      if (!msg) { el.style.display = 'none'; return; }
       el.textContent = msg;
       el.className = 'status ' + type;
     }
