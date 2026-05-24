@@ -589,14 +589,17 @@
 
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    // Seed Ava's nest if not yet present
+    // Seed Ava's nest if not yet present, or correct date if wrong
     (function seedAva() {
       const key = 'geplandNesten';
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      if (!existing.find(n => n.nestnaam === 'Ava')) {
-        existing.push({ nestnaam: 'Ava', geboortedatum: '2026-05-10', aangemaaktOp: '2026-05-10T00:00:00.000Z' });
-        localStorage.setItem(key, JSON.stringify(existing));
+      const idx = existing.findIndex(n => n.nestnaam === 'Ava');
+      if (idx === -1) {
+        existing.push({ nestnaam: 'Ava', geboortedatum: '2026-04-01', aangemaaktOp: '2026-04-01T00:00:00.000Z' });
+      } else if (existing[idx].geboortedatum !== '2026-04-01') {
+        existing[idx].geboortedatum = '2026-04-01';
       }
+      localStorage.setItem(key, JSON.stringify(existing));
     })();
 
     renderNestenOverzicht();
