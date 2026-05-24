@@ -1,4 +1,4 @@
-const CACHE = 'emmaliedoodles-v6';
+const CACHE = 'emmaliedoodles-v7';
 const ASSETS = [
   '/',
   '/index.html',
