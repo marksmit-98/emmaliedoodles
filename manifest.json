@@ -1,8 +1,9 @@
 {
-  "name": "Nestplanning - Emmaliedoodles",
-  "short_name": "Nestplanning",
-  "description": "Nestplanning voor Emmaliedoodles",
+  "name": "Emmaliedoodles",
+  "short_name": "Emmaliedoodles",
+  "description": "Fokprogramma & nestplanning voor Emmaliedoodles Australian Labradoodles",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f4f1ec",
   "theme_color": "#8b9a78",
@@ -10,12 +11,20 @@
     {
       "src": "favicon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "favicon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
