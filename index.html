@@ -869,14 +869,14 @@ function expectedWindow(cycles) {
   if (!cycles.length) return null;
   const latest = parseDate(cycles[cycles.length - 1].startDate);
   const avg    = avgInterval(cycles);
-  const center = avg !== null ? addDays(latest, Math.round(avg)) : addMonths(latest, 6);
+  const center = avg !== null ? addDays(latest, Math.round(avg)) : addMonths(latest, 7);
   return { from: addDays(center, -14), center, to: addDays(center, 28) };
 }
 
-// Advance a center ISO date by avg days (or 6 months as fallback)
+// Advance a center ISO date by avg days (or 7 months as fallback)
 function advanceCenter(centerIso, avg) {
   const c = parseDate(centerIso);
-  return isoDate(avg !== null ? addDays(c, Math.round(avg)) : addMonths(c, 6));
+  return isoDate(avg !== null ? addDays(c, Math.round(avg)) : addMonths(c, 7));
 }
 
 // Returns { fromIso, toIso } spanning exactly the 3 calendar months around the center
