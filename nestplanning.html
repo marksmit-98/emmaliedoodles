@@ -265,6 +265,15 @@
     .nest-event-date  { color:#a09890; }
     .nest-done { font-size:13px; color:#a09890; font-style:italic; }
 
+    .event-list-title { font-size:13px; font-weight:500; color:#43554f; margin-bottom:12px; }
+    .event-item { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #f0ece6; }
+    .event-item:last-child { border-bottom:none; }
+    .event-check { width:22px; height:22px; border-radius:50%; background:#d4edda; color:#2d6a4f; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .event-info { flex:1; }
+    .event-title { font-size:13px; font-weight:400; color:#282D33; }
+    .event-date  { font-size:12px; color:#a09890; margin-top:1px; }
+    .event-week  { font-size:11px; color:#a09890; white-space:nowrap; }
+
   </style>
 </head>
 <body>
@@ -579,6 +588,16 @@
     }
 
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Seed Ava's nest if not yet present
+    (function seedAva() {
+      const key = 'geplandNesten';
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!existing.find(n => n.nestnaam === 'Ava')) {
+        existing.push({ nestnaam: 'Ava', geboortedatum: '2026-05-10', aangemaaktOp: '2026-05-10T00:00:00.000Z' });
+        localStorage.setItem(key, JSON.stringify(existing));
+      }
+    })();
 
     renderNestenOverzicht();
 
