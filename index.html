@@ -76,6 +76,7 @@
       font-size: 20px;
       color: #43554f;
       letter-spacing: -0.02em;
+      text-decoration: none;
     }
 
     .app-header-right { display: flex; align-items: center; gap: 16px; }
@@ -425,7 +426,7 @@
       justify-content: space-between;
       padding: 10px 0;
     }
-    .toggle-label { font-size: 14px; color: #282D33; }
+    .toggle-label { font-size: 13px; font-weight: 500; color: #43554f; letter-spacing: 0.02em; text-transform: uppercase; }
 
     .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
@@ -758,7 +759,7 @@
 <!-- ── APP ──────────────────────────────────────────── -->
 <div id="app">
   <header class="app-header">
-    <span class="app-header-title">Emmaliedoodles</span>
+    <a href="index.html" class="app-header-title">Emmaliedoodles</a>
     <div class="app-header-right">
       <a href="drachtplanner.html" class="header-link">Drachtplanner</a>
       <a href="nestplanning.html" class="header-link">Nestplanning</a>
@@ -1255,7 +1256,7 @@ window.openCycleModal = id => {
       <input type="date" id="cDate" value="${c?.startDate || ''}">
     </div>
     <div class="toggle-row">
-      <span class="toggle-label">Gedekt</span>
+      <span class="toggle-label">Gedekt tijdens deze loopsheid</span>
       <label class="toggle">
         <input type="checkbox" id="cMated" ${c?.mated ? 'checked' : ''}>
         <span class="toggle-slider"></span>
