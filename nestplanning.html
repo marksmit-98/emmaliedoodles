@@ -45,10 +45,10 @@
       text-decoration: none;
     }
 
-    .nav-links { display: flex; align-items: center; gap: 16px; }
-    .nav-link { font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 400; color: #5f6e5e; text-decoration: none; }
-    .nav-link:hover { color: #43554f; }
-    .nav-link.active { color: #43554f; font-weight: 500; border-bottom: 2px solid #43554f; padding-bottom: 1px; }
+    .app-header-right { display: flex; align-items: center; gap: 16px; }
+
+    .header-link { font-size: 13px; color: #5f6e5e; text-decoration: none; font-weight: 400; }
+    .header-link:hover { color: #43554f; }
 
     .hamburger { display:none; flex-direction:column; justify-content:center; gap:5px; background:none; border:none; cursor:pointer; padding:4px; }
     .hamburger span { display:block; width:22px; height:2px; background:#43554f; border-radius:2px; transition:all 0.2s; }
@@ -62,7 +62,7 @@
     .mobile-menu-link:last-child { border-bottom:none; }
 
     @media (max-width: 480px) {
-      .nav-links { display: none; }
+      .header-link { display: none; }
       .hamburger { display: flex; }
     }
 
@@ -266,18 +266,16 @@
 <body>
   <header class="app-header">
     <a href="index.html" class="app-header-title">Emmaliedoodles</a>
-    <nav class="nav-links">
-      <a href="index.html" class="nav-link">Fokprogramma</a>
-      <a href="drachtplanner.html" class="nav-link">Drachtplanner</a>
-      <a href="nestplanning.html" class="nav-link active">Nestplanner</a>
-    </nav>
-    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <div class="app-header-right">
+      <a href="index.html" class="header-link">Fokprogramma</a>
+      <a href="drachtplanner.html" class="header-link">Drachtplanner</a>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
     <div class="mobile-menu" id="mobileMenu">
       <a href="index.html" class="mobile-menu-link">Fokprogramma</a>
       <a href="drachtplanner.html" class="mobile-menu-link">Drachtplanner</a>
-      <a href="nestplanning.html" class="mobile-menu-link">Nestplanner</a>
     </div>
   </header>
 
