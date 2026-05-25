@@ -275,6 +275,7 @@
     .dog-name { font-size: 15px; font-weight: 500; color: #282D33; }
     .dog-pedigree { font-size: 12px; color: #8a7a70; font-style: italic; margin-bottom: 4px; }
     .dog-meta { font-size: 12px; color: #a09890; display: flex; gap: 4px; flex-wrap: wrap; }
+    .dog-keuring { font-size: 12px; color: #8a6a00; margin-top: 5px; }
     .dog-meta-sep { color: #d6d0c8; }
 
     /* ── legacy card (kept for other uses) ── */
@@ -627,6 +628,8 @@
     .cal-cell-green       { background: #7bb87b; cursor: pointer; }
     .cal-cell-green:hover { background: #5e9e5e; }
     .cal-cell-red         { background: #e8a09a; }
+    .cal-cell-keuring     { background: #fef2c0; color: #b89a40; font-size: 13px; }
+    .dot-keuring          { background: #c9a227; }
 
     .dot {
       display: inline-block;
@@ -1090,6 +1093,15 @@ function renderTeefjes() {
           d.fosterFamily ? esc(d.fosterFamily) : null,
           `${n} ${n !== 1 ? 'loopsheden' : 'loopsheid'}`,
         ].filter(Boolean);
+        let keuringLine = '';
+        if (g.label === 'In opbouw' && d.birthDate) {
+          const birthD = parseDate(d.birthDate);
+          const keurD  = new Date(birthD);
+          keurD.setFullYear(keurD.getFullYear() + 1);
+          keuringLine = new Date() >= keurD
+            ? `<div class="dog-keuring">★ Keurbaar</div>`
+            : `<div class="dog-keuring">★ Keurbaar vanaf ${fmtDate(isoDate(keurD))}</div>`;
+        }
         html += `
           <div class="dog-card" onclick="openDogModal('${d.id}')">
             <div class="dog-avatar ${avatarCls}">${initial}</div>
@@ -1104,6 +1116,7 @@ function renderTeefjes() {
                   ? `<span>${m}</span><span class="dog-meta-sep">·</span>`
                   : `<span>${m}</span>`).join('')}
               </div>
+              ${keuringLine}
             </div>
             <button class="icon-btn" onclick="event.stopPropagation();openDogModal('${d.id}')" title="Bewerken">✎</button>
           </div>
@@ -1385,6 +1398,7 @@ function renderKalender() {
     <div class="legend">
       <div class="legend-item"><span class="dot" style="background:#7bb87b"></span> Nest mogelijk — vorige loopsheid niet gedekt</div>
       <div class="legend-item"><span class="dot dot-red"></span> Nest niet mogelijk — vorige loopsheid gedekt</div>
+      ${kalenderFilter === 'In opbouw' ? `<div class="legend-item"><span class="dot dot-keuring"></span> Eerste maand keurbaar</div>` : ''}
     </div>
     <div class="cal-scroll">
       <table class="cal-table">
@@ -1419,16 +1433,23 @@ function renderKalender() {
       const hit   = windows.find(w => w.fromIso <= endIso && w.toIso >= startIso);
       const color = hit ? hit.color : null;
 
+      let isKeuring = false;
+      if (d.birthDate) {
+        const birthD = parseDate(d.birthDate);
+        isKeuring = y === birthD.getFullYear() + 1 && m === birthD.getMonth();
+      }
+
       let cls = '';
       if (color === 'red')        cls = 'cal-cell-red';
       else if (color === 'green') cls = 'cal-cell-green';
       else if (isNow)             cls = 'cal-cell-now';
+      else if (isKeuring)        cls = 'cal-cell-keuring';
 
       const clickable = color === 'green'
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
         : '';
 
-      html += `<td class="${cls}" ${clickable}></td>`;
+      html += `<td class="${cls}" ${clickable}>${isKeuring ? '★' : ''}</td>`;
     }
     html += `</tr>`;
   }
