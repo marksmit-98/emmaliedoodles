@@ -1407,7 +1407,7 @@ function renderKalender() {
   `;
 
   for (let i = 0; i < 24; i++) {
-    const d    = addMonths(now, i);
+    const d    = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const isNow = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     html += `<th ${isNow ? 'class="cal-th-now"' : ''}>${MONTHS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}</th>`;
   }
@@ -1422,7 +1422,7 @@ function renderKalender() {
     const windows = allExpectedWindows(dogCycles(d.id));
     html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
-      const md    = addMonths(now, i);
+      const md    = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const y     = md.getFullYear();
       const m     = md.getMonth();
       const mm    = String(m + 1).padStart(2, '0');
