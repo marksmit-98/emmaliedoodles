@@ -373,7 +373,7 @@
       {
         months: 18, week: 'Maand 18', title: 'Castratie/sterilisatie deadline',
         notes: '• Uiterste datum waarop alle pups van dit nest gecastreerd/gesteriliseerd moeten zijn',
-        timedReminder: true, reminderLeadDays: 30, notifyEmail: 'emmaliedoodles@icloud.com',
+        timedReminder: true, reminderLeadDays: 30,
       },
     ];
 
@@ -512,7 +512,6 @@
           const overrides = [{ method: 'popup', minutes: 0 }];
           if (item.reminderLeadDays) {
             overrides.push({ method: 'popup', minutes: item.reminderLeadDays * 24 * 60 });
-            overrides.push({ method: 'email', minutes: item.reminderLeadDays * 24 * 60 });
           }
           const reminderBody = {
             summary: `${item.title} \u2013 ${nestnaam}`,
@@ -523,13 +522,8 @@
             end:   { dateTime: `${dateStr}T21:30:00`, timeZone: 'Europe/Amsterdam' },
             reminders: { useDefault: false, overrides },
           };
-          if (item.notifyEmail) {
-            reminderBody.attendees = [{ email: item.notifyEmail }];
-          }
-          const reminderUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events` +
-            (item.notifyEmail ? '?sendUpdates=all' : '');
           const reminderRes = await fetch(
-            reminderUrl,
+            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
             {
               method: 'POST',
               headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
