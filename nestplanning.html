@@ -370,6 +370,11 @@
         day: 53, week: 'Week 7.5', title: 'Pups mogen vertrekken',
         notes: '• Vanaf deze datum mogen pups naar hun nieuwe thuis\n• Meegeven: puppypas en chipregistratieformulier\n• Meegeven: vachtproductenlijst, voedingsadvies en startpakket\n• Meegeven: nestknuffel\n• Meegeven: informatiepapier chippen en inenten\n• Kopers informeren dat ze hun pup kunnen ophalen',
       },
+      {
+        months: 18, week: 'Maand 18', title: 'Castratie/sterilisatie deadline',
+        notes: '• Uiterste datum waarop alle pups van dit nest gecastreerd/gesteriliseerd moeten zijn',
+        timedReminder: true, reminderLeadDays: 30, notifyEmail: 'emmaliedoodles@icloud.com',
+      },
     ];
 
     let tokenClient = null;
@@ -429,6 +434,19 @@
       return d.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
+    function addMonths(dateStr, months) {
+      const d = new Date(dateStr + 'T00:00:00');
+      d.setMonth(d.getMonth() + months);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function getEventDate(item, geboortedatum) {
+      return item.months != null ? addMonths(geboortedatum, item.months) : addDays(geboortedatum, item.day);
+    }
+
     async function createAllEvents() {
       const nestnaam = document.getElementById('nestnaam').value.trim();
       const geboortedatum = document.getElementById('geboortedatum').value;
@@ -457,8 +475,8 @@
         const item = SCHEMA[i];
         showStatus(`Aanmaken ${i + 1} van ${SCHEMA.length}...`, 'info');
 
-        const dateStr = addDays(geboortedatum, item.day);
-        const nextDay = addDays(geboortedatum, item.day + 1);
+        const dateStr = getEventDate(item, geboortedatum);
+        const nextDay = addDays(dateStr, 1);
 
         const body = {
           summary: `${item.title} \u2013 ${nestnaam}`,
@@ -491,14 +509,27 @@
         created.push({ ...item, date: dateStr });
 
         if (item.timedReminder) {
+          const overrides = [{ method: 'popup', minutes: 0 }];
+          if (item.reminderLeadDays) {
+            overrides.push({ method: 'popup', minutes: item.reminderLeadDays * 24 * 60 });
+            overrides.push({ method: 'email', minutes: item.reminderLeadDays * 24 * 60 });
+          }
           const reminderBody = {
             summary: `${item.title} \u2013 ${nestnaam}`,
+            description: item.notes
+              ? `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}\n\n${item.notes}`
+              : `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
             start: { dateTime: `${dateStr}T21:00:00`, timeZone: 'Europe/Amsterdam' },
             end:   { dateTime: `${dateStr}T21:30:00`, timeZone: 'Europe/Amsterdam' },
-            reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+            reminders: { useDefault: false, overrides },
           };
+          if (item.notifyEmail) {
+            reminderBody.attendees = [{ email: item.notifyEmail }];
+          }
+          const reminderUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events` +
+            (item.notifyEmail ? '?sendUpdates=all' : '');
           const reminderRes = await fetch(
-            `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+            reminderUrl,
             {
               method: 'POST',
               headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -561,7 +592,7 @@
 
       lijst.innerHTML = nesten.map((n, idx) => {
         const upcoming = SCHEMA
-          .map(s => ({ title: s.title, date: addDays(n.geboortedatum, s.day) }))
+          .map(s => ({ title: s.title, date: getEventDate(s, n.geboortedatum) }))
           .filter(s => new Date(s.date + 'T00:00:00') >= today)
           .slice(0, 3);
         const eventsHtml = upcoming.length
