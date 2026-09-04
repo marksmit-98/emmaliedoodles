@@ -518,8 +518,8 @@
             description: item.notes
               ? `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}\n\n${item.notes}`
               : `${item.week} | Nestje: ${nestnaam}\nGeboren: ${formatDate(geboortedatum)}`,
-            start: { dateTime: `${dateStr}T21:54:00`, timeZone: 'Europe/Amsterdam' },
-            end:   { dateTime: `${dateStr}T22:24:00`, timeZone: 'Europe/Amsterdam' },
+            start: { dateTime: `${dateStr}T21:00:00`, timeZone: 'Europe/Amsterdam' },
+            end:   { dateTime: `${dateStr}T21:30:00`, timeZone: 'Europe/Amsterdam' },
             reminders: { useDefault: false, overrides },
           };
           const reminderRes = await fetch(
