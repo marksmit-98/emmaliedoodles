@@ -1462,7 +1462,12 @@ function renderKalender() {
       ? addMonths(parseDate(d.eyeTestDate), 12)
       : null;
     if (eyeTestDueD && eyeTestDueD < new Date(now.getFullYear(), now.getMonth(), 1)) {
-      eyeTestDueD = new Date(now.getFullYear(), now.getMonth(), 1); // al verlopen → toon in huidige maand
+      // al verlopen → toon bij de eerstvolgende GROENE (nest mogelijk) loopsheid
+      const nowIso = isoDate(now);
+      const nextGreen = windows
+        .filter(w => w.color === 'green' && w.toIso >= nowIso)
+        .sort((a, b) => a.fromIso.localeCompare(b.fromIso))[0];
+      eyeTestDueD = nextGreen ? parseDate(nextGreen.fromIso) : null;
     }
     html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
