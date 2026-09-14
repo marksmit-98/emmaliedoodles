@@ -1336,7 +1336,9 @@ function renderLoopsheden() {
             <div class="cycle-info">
               <div class="cycle-date">${fmtDate(c.startDate)}</div>
               <div class="cycle-meta">
-                ${c.mated ? 'Gedekt' : 'Niet gedekt'}
+                ${c.mated
+                  ? `Gedekt tijdens deze loopsheid${c.matingDate ? ` &middot; dekdatum ${fmtDate(c.matingDate)}` : ''}`
+                  : 'Niet gedekt tijdens deze loopsheid'}
                 ${c.notes ? ` &middot; ${esc(c.notes)}` : ''}
               </div>
               ${interval !== null ? `<span class="cycle-interval">Interval: ${fmtInterval(interval)}</span>` : ''}
@@ -1376,9 +1378,13 @@ window.openCycleModal = id => {
     <div class="toggle-row">
       <span class="toggle-label">Gedekt tijdens deze loopsheid</span>
       <label class="toggle">
-        <input type="checkbox" id="cMated" ${c?.mated ? 'checked' : ''}>
+        <input type="checkbox" id="cMated" onchange="document.getElementById('matingDateGroup').style.display = this.checked ? 'block' : 'none'" ${c?.mated ? 'checked' : ''}>
         <span class="toggle-slider"></span>
       </label>
+    </div>
+    <div class="form-group" id="matingDateGroup" style="margin-top:12px;display:${c?.mated ? 'block' : 'none'}">
+      <label>Datum van (eerste) dekking</label>
+      <input type="date" id="cMatingDate" value="${c?.matingDate || ''}">
     </div>
     <div class="form-group" style="margin-top:12px">
       <label>Notities</label>
@@ -1398,10 +1404,12 @@ window.submitCycle = async id => {
     ? heatCycles.find(x => x.id === id)?.dogId
     : document.getElementById('cDogId').value;
   if (!dogId) { alert('Selecteer een hond.'); return; }
+  const mated = document.getElementById('cMated').checked;
   await saveCycle({
     dogId,
     startDate,
-    mated: document.getElementById('cMated').checked,
+    mated,
+    matingDate: mated ? (document.getElementById('cMatingDate').value || null) : null,
     notes: document.getElementById('cNotes').value.trim() || null,
   }, id || null);
   closeModal();
