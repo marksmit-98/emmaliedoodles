@@ -282,7 +282,7 @@
     .dog-eyetest-soon     { color: #b89a40; }
     .dog-eyetest-expired  { color: #b23b3b; font-weight: 500; }
     .dog-eyetest-unknown  { color: #b23b3b; }
-    .dot-eyetest          { background: #000; }
+    .dot-eyetest          { background: transparent; border: 2px solid #000; }
 
     /* ── legacy card (kept for other uses) ── */
     .card {
@@ -1436,7 +1436,7 @@ function renderKalender() {
       <div class="legend-item"><span class="dot" style="background:#7bb87b"></span> Nest mogelijk — vorige loopsheid niet gedekt</div>
       <div class="legend-item"><span class="dot dot-red"></span> Nest niet mogelijk — vorige loopsheid gedekt</div>
       ${kalenderFilter === 'In opbouw' ? `<div class="legend-item"><span class="dot dot-keuring"></span> Eerste maand keurbaar</div>` : ''}
-      ${kalenderFilter === 'Actief' ? `<div class="legend-item"><span class="dot dot-eyetest"></span> Oogtest verlopen tegen deze loopsheid</div>` : ''}
+      ${kalenderFilter === 'Actief' ? `<div class="legend-item"><span class="dot dot-eyetest"></span> Oogtest moet vernieuwd zijn vóór deze loopsheid</div>` : ''}
     </div>
     <div class="cal-scroll">
       <table class="cal-table">
@@ -1462,12 +1462,20 @@ function renderKalender() {
       ? addMonths(parseDate(d.eyeTestDate), 12)
       : null;
     if (eyeTestDueD && eyeTestDueD < new Date(now.getFullYear(), now.getMonth(), 1)) {
-      // al verlopen → toon bij de eerstvolgende GROENE (nest mogelijk) loopsheid
+      // al verlopen → toon één maand vóór de eerstvolgende GROENE (nest mogelijk) loopsheid
       const nowIso = isoDate(now);
       const nextGreen = windows
         .filter(w => w.color === 'green' && w.toIso >= nowIso)
         .sort((a, b) => a.fromIso.localeCompare(b.fromIso))[0];
-      eyeTestDueD = nextGreen ? parseDate(nextGreen.fromIso) : null;
+      eyeTestDueD = nextGreen ? addMonths(parseDate(nextGreen.fromIso), -1) : null;
+    }
+    // veiligheidscheck: icoon mag nooit in een maand vallen waarin al een loopsheid wordt verwacht
+    if (eyeTestDueD) {
+      const dY = eyeTestDueD.getFullYear(), dM = eyeTestDueD.getMonth();
+      const dStartIso = `${dY}-${String(dM + 1).padStart(2, '0')}-01`;
+      const dEndIso   = isoDate(new Date(dY, dM + 1, 0));
+      const onWindow  = windows.find(w => w.fromIso <= dEndIso && w.toIso >= dStartIso);
+      if (onWindow) eyeTestDueD = addMonths(eyeTestDueD, -1);
     }
     html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
@@ -1500,7 +1508,7 @@ function renderKalender() {
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
         : '';
 
-      const icon = isKeuring ? '★' : isEyeTestWarn ? '●' : '';
+      const icon = isKeuring ? '★' : isEyeTestWarn ? '◉' : '';
       html += `<td class="${cls}" ${clickable}>${icon}</td>`;
     }
     html += `</tr>`;
