@@ -282,7 +282,6 @@
     .dog-eyetest-soon     { color: #b89a40; }
     .dog-eyetest-expired  { color: #b23b3b; font-weight: 500; }
     .dog-eyetest-unknown  { color: #b23b3b; }
-    .cal-eyetest-icon     { color: #000; }
     .dot-eyetest          { background: #000; }
 
     /* ── legacy card (kept for other uses) ── */
@@ -1459,9 +1458,12 @@ function renderKalender() {
 
   for (const d of shown) {
     const windows  = allExpectedWindows(dogCycles(d.id));
-    const eyeTestDueD = (kalenderFilter === 'Actief' && d.eyeTestDate)
+    let eyeTestDueD = (kalenderFilter === 'Actief' && d.eyeTestDate)
       ? addMonths(parseDate(d.eyeTestDate), 12)
       : null;
+    if (eyeTestDueD && eyeTestDueD < new Date(now.getFullYear(), now.getMonth(), 1)) {
+      eyeTestDueD = new Date(now.getFullYear(), now.getMonth(), 1); // al verlopen → toon in huidige maand
+    }
     html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
       const md    = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -1481,8 +1483,7 @@ function renderKalender() {
         isKeuring = y === birthD.getFullYear() + 1 && m === birthD.getMonth();
       }
 
-      // oogtest is (al) verlopen tegen de tijd van deze verwachte loopsheid
-      const isEyeTestWarn = !!hit && !!eyeTestDueD && isoDate(eyeTestDueD) <= endIso;
+      const isEyeTestWarn = !!eyeTestDueD && y === eyeTestDueD.getFullYear() && m === eyeTestDueD.getMonth();
 
       let cls = '';
       if (color === 'red')        cls = 'cal-cell-red';
@@ -1494,7 +1495,7 @@ function renderKalender() {
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
         : '';
 
-      const icon = isKeuring ? '★' : isEyeTestWarn ? '<span class="cal-eyetest-icon">●</span>' : '';
+      const icon = isKeuring ? '★' : isEyeTestWarn ? '●' : '';
       html += `<td class="${cls}" ${clickable}>${icon}</td>`;
     }
     html += `</tr>`;
