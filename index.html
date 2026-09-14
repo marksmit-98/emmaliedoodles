@@ -282,9 +282,8 @@
     .dog-eyetest-soon     { color: #b89a40; }
     .dog-eyetest-expired  { color: #b23b3b; font-weight: 500; }
     .dog-eyetest-unknown  { color: #b23b3b; }
-    .dog-eyetest-remind   { background: none; border: none; cursor: pointer; font-size: 12px; color: #8a7a70; margin-left: 4px; }
-    .cal-cell-eyetest     { background: #fde2e2; color: #b23b3b; font-size: 13px; }
-    .dot-eyetest          { background: #b23b3b; }
+    .cal-eyetest-icon     { color: #000; }
+    .dot-eyetest          { background: #000; }
 
     /* ── legacy card (kept for other uses) ── */
     .card {
@@ -812,7 +811,6 @@
   </div>
 </div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script type="module">
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -851,71 +849,6 @@ const addMonths  = (d, n) => { const r = new Date(d); r.setMonth(r.getMonth() + 
 const daysBetween = (a, b) => Math.round((b - a) / 86400000);
 const fmtDate    = s => parseDate(s).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
 const fmtShort   = s => parseDate(s).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
-
-// ── google calendar (oogtest-herinnering) ──────────────
-const GCAL_CLIENT_ID     = '513871307896-n569hcc5gs2ig6dn6sm5i25qtdl06tg5.apps.googleusercontent.com';
-const GCAL_SCOPES        = 'https://www.googleapis.com/auth/calendar';
-const GCAL_CALENDAR_NAME = 'Emmaliedoodles';
-let gcalTokenClient = null;
-let gcalAccessToken = null;
-
-function gcalInitTokenClient() {
-  if (gcalTokenClient) return;
-  gcalTokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: GCAL_CLIENT_ID,
-    scope: GCAL_SCOPES,
-    callback: () => {},
-  });
-}
-
-async function gcalFindCalendarId() {
-  const res = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true', {
-    headers: { Authorization: `Bearer ${gcalAccessToken}` }
-  });
-  if (!res.ok) throw new Error('Kan agendalijst niet ophalen.');
-  const data = await res.json();
-  const cal = (data.items || []).find(c => c.summary && c.summary.toLowerCase() === GCAL_CALENDAR_NAME.toLowerCase());
-  return cal ? cal.id : null;
-}
-
-window.addEyeTestReminder = dogId => {
-  const d = dogs.find(x => x.id === dogId);
-  if (!d || !d.eyeTestDate) { alert('Vul eerst een oogtestdatum in.'); return; }
-  if (typeof google === 'undefined') { alert('Google-script nog niet geladen, probeer het zo opnieuw.'); return; }
-
-  const dueD   = addMonths(parseDate(d.eyeTestDate), 12);
-  const dueIso = isoDate(dueD);
-
-  gcalInitTokenClient();
-  gcalTokenClient.callback = async resp => {
-    if (resp.error) { alert('Google-autorisatie mislukt.'); return; }
-    gcalAccessToken = resp.access_token;
-    try {
-      const calendarId = await gcalFindCalendarId();
-      if (!calendarId) { alert(`Agenda "${GCAL_CALENDAR_NAME}" niet gevonden.`); return; }
-
-      const body = {
-        summary: `Oogtest (ECVO) vernieuwen – ${d.name}`,
-        description: `Jaarlijkse oogtest van ${d.name} moet vernieuwd zijn.\nLaatste test: ${fmtDate(d.eyeTestDate)}`,
-        start: { dateTime: `${dueIso}T21:00:00`, timeZone: 'Europe/Amsterdam' },
-        end:   { dateTime: `${dueIso}T21:30:00`, timeZone: 'Europe/Amsterdam' },
-        reminders: { useDefault: false, overrides: [
-          { method: 'popup', minutes: 0 },
-          { method: 'popup', minutes: 28 * 24 * 60 },
-        ] },
-      };
-      const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
-        { method: 'POST', headers: { Authorization: `Bearer ${gcalAccessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-      );
-      if (!res.ok) { const err = await res.json(); alert(`Fout bij aanmaken: ${err.error?.message || res.status}`); return; }
-      alert(`Herinnering toegevoegd op ${fmtDate(dueIso)}.`);
-    } catch (e) {
-      alert(e.message);
-    }
-  };
-  gcalTokenClient.requestAccessToken({ prompt: '' });
-};
 
 function fmtInterval(days) {
   if (days === null || days === undefined) return '—';
@@ -1188,9 +1121,7 @@ function renderTeefjes() {
             const daysLeft = daysBetween(new Date(), dueD);
             const cls = daysLeft < 0 ? 'dog-eyetest-expired' : daysLeft <= 30 ? 'dog-eyetest-soon' : 'dog-eyetest-ok';
             const label = daysLeft < 0 ? 'verlopen' : `volgende voor ${fmtDate(isoDate(dueD))}`;
-            eyeTestLine = `<div class="dog-eyetest ${cls}">◉ Oogtest: laatst ${fmtDate(d.eyeTestDate)} · ${label}
-              <button class="dog-eyetest-remind" onclick="event.stopPropagation();addEyeTestReminder('${d.id}')" title="Herinnering in Google Calendar zetten">🔔</button>
-            </div>`;
+            eyeTestLine = `<div class="dog-eyetest ${cls}">◉ Oogtest: laatst ${fmtDate(d.eyeTestDate)} · ${label}</div>`;
           }
         } else if (g.label === 'In opbouw' && d.eyeTestDate) {
           eyeTestLine = `<div class="dog-eyetest dog-eyetest-ok">◉ Oogtest gedaan: ${fmtDate(d.eyeTestDate)}</div>`;
@@ -1506,7 +1437,7 @@ function renderKalender() {
       <div class="legend-item"><span class="dot" style="background:#7bb87b"></span> Nest mogelijk — vorige loopsheid niet gedekt</div>
       <div class="legend-item"><span class="dot dot-red"></span> Nest niet mogelijk — vorige loopsheid gedekt</div>
       ${kalenderFilter === 'In opbouw' ? `<div class="legend-item"><span class="dot dot-keuring"></span> Eerste maand keurbaar</div>` : ''}
-      ${kalenderFilter === 'Actief' ? `<div class="legend-item"><span class="dot dot-eyetest"></span> Oogtest moet vernieuwd worden</div>` : ''}
+      ${kalenderFilter === 'Actief' ? `<div class="legend-item"><span class="dot dot-eyetest"></span> Oogtest verlopen tegen deze loopsheid</div>` : ''}
     </div>
     <div class="cal-scroll">
       <table class="cal-table">
@@ -1527,7 +1458,10 @@ function renderKalender() {
   }
 
   for (const d of shown) {
-    const windows = allExpectedWindows(dogCycles(d.id));
+    const windows  = allExpectedWindows(dogCycles(d.id));
+    const eyeTestDueD = (kalenderFilter === 'Actief' && d.eyeTestDate)
+      ? addMonths(parseDate(d.eyeTestDate), 12)
+      : null;
     html += `<tr><td class="cal-dog-col" title="${windows.length} venster(s)">${esc(d.name)}</td>`;
     for (let i = 0; i < 24; i++) {
       const md    = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -1547,24 +1481,21 @@ function renderKalender() {
         isKeuring = y === birthD.getFullYear() + 1 && m === birthD.getMonth();
       }
 
-      let isEyeTestDue = false;
-      if (kalenderFilter === 'Actief' && d.eyeTestDate) {
-        const dueD = addMonths(parseDate(d.eyeTestDate), 12);
-        isEyeTestDue = y === dueD.getFullYear() && m === dueD.getMonth();
-      }
+      // oogtest is (al) verlopen tegen de tijd van deze verwachte loopsheid
+      const isEyeTestWarn = !!hit && !!eyeTestDueD && isoDate(eyeTestDueD) <= endIso;
 
       let cls = '';
       if (color === 'red')        cls = 'cal-cell-red';
       else if (color === 'green') cls = 'cal-cell-green';
       else if (isNow)             cls = 'cal-cell-now';
       else if (isKeuring)         cls = 'cal-cell-keuring';
-      else if (isEyeTestDue)      cls = 'cal-cell-eyetest';
 
       const clickable = color === 'green'
         ? `onclick="openDekModal('${d.id}')" title="Dek registreren"`
         : '';
 
-      html += `<td class="${cls}" ${clickable}>${isKeuring ? '★' : isEyeTestDue ? '◉' : ''}</td>`;
+      const icon = isKeuring ? '★' : isEyeTestWarn ? '<span class="cal-eyetest-icon">●</span>' : '';
+      html += `<td class="${cls}" ${clickable}>${icon}</td>`;
     }
     html += `</tr>`;
   }
