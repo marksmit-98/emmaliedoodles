@@ -1,7 +1,7 @@
 # CLAUDE.md — Emmaliedoodles (fokkerij-tools)
 
 ## Bedrijf & doel
-- Emmaliedoodles is de doodlefokkerij van Emma en Mark.
+- Emmaliedoodles is de Australian Labradoodle-fokkerij van Emma en Mark.
 - Deze repo bevat de interne fokkerij-tools, niet de publieke website.
 - `emmaliedoodles.com` draait op WordPress en staat niet in deze repo.
 - Zustermerk: DoodleDeLux (trimsalon van Emma), repo `marksmit-98/trimsalon-agenda`.
