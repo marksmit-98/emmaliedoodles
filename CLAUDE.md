@@ -1,9 +1,10 @@
 # CLAUDE.md — Emmaliedoodles (fokkerij-tools)
 
 ## Bedrijf & doel
-- Emmaliedoodles is de Australian Labradoodle-fokkerij van Emma en Mark.
+- Emmaliedoodles is de Australian Labradoodle-fokkerij (mini en medium) van Emma en haar moeder Alie, in Elspeet (Veluwe). Alie is ermee begonnen; Emma doet sinds januari 2026 mee.
+- Mark (Emma's man) doet de technische kant en helpt bij dekkingen, geboortes en de verzorging van de pups.
 - Deze repo bevat de interne fokkerij-tools, niet de publieke website.
-- `emmaliedoodles.com` draait op WordPress en staat niet in deze repo.
+- `emmaliedoodles.com` draait op WordPress en staat niet in deze repo. Actuele honden staan op `/minis/`, `/mediums/` en `/toekomstige-teefjes/`.
 - Zustermerk: DoodleDeLux (trimsalon van Emma), repo `marksmit-98/trimsalon-agenda`.
 
 ## Context bijhouden
@@ -31,7 +32,12 @@
 - Commit-berichten: Nederlands, imperatief; bijvoorbeeld `Voeg X toe` of `Fix Y`.
 - Website-copy (`emmaliedoodles.com`): geen emoji's als 🎉 of 🚀; hooguit één hartje (💚 of 🤎) per tekstblok.
 - Alle teefjes zijn eigen honden, ook als ze in een gastgezin wonen. Contrasteer nooit één hond als "onze eigen hond" met de andere; beschrijf waar ze wonen.
-- Mollie woont bij Emma en Mark; Aaf, Pip, Lily en andere teefjes wonen in gastgezinnen.
+- Waar de honden wonen (stand 2026-11):
+  - Bij Emma en Mark: Mollie (Flevodoodles Mollie, mini).
+  - Bij Alie: Rocco (eerste Labradoodle, sinds 2013) en Lia (Sweet Angela Birgit Cecilia, medium, toekomstig).
+  - In gastgezinnen: Lily Rose (Geldersedoodles, mini), Pip, Aaf en Sterre (medium); toekomstig: Daisy Joy en Noor (mini), Mikkie Milou (medium).
+- Doelgroep: gezinnen en actieve mensen die een pup zoeken, ook mensen met allergieën; gastgezinnen bij voorkeur binnen 30 minuten van Elspeet.
+- Tone of voice: warm, persoonlijk, rustig en deskundig; wij-vorm, lezer met je/jij; geen verkooppraat. Schrijf "Australian Labradoodle" met hoofdletters.
 
 ## Domeinregels
 - **Bepalend:** NL Besluit houders van dieren, art. 3.4 lid 3: maximaal één nest per 12 aaneengesloten maanden (strenger dan ALAEU's 10 maanden).
