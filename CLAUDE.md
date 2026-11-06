@@ -21,7 +21,7 @@
 - `FOKKERIJ_PLAN.md`: oorspronkelijk bouwplan; deels verouderd, de beschreven fases zijn gebouwd.
 
 ## Accounts (niet-voor-de-hand-liggend)
-- Push als `marksmit-98`.
+- Push als `marksmit-98`. Commit-auteur: `Mark Smit <mark.smit1998@live.nl>`, niet het CloudNation-adres.
 - Eigenaar Firebase-project: `mark.smit1998@gmail.com`.
 - `ALLOWED` staat in zowel `index.html` als `nestplanning.html`:
   `mark.smit1998@gmail.com`, `doodledelux@icloud.com`, `emmaliedoodles@gmail.com`.
@@ -54,4 +54,4 @@
 - Gebruik `FOKKERIJ_PLAN.md` niet als actuele lijst van nog te bouwen fases.
 - Wijzig toegang nooit in maar één HTML-bestand of alleen in de Firestore rules.
 - Plan niet op basis van ALAEU's 10 maanden: de wettelijke 12 maanden zijn bepalend.
-- `Fokprogramma_kalender.*` en `desktop.ini` zijn lokale bestanden; niet committen.
+- `artifacts/`, `Fokprogramma_kalender.*` en `desktop.ini` zijn lokale bestanden (staan in `.gitignore`); niet committen.
